@@ -6,15 +6,15 @@ description: >-
   would act on anyway, and sentences that carry nothing. Edits in place, then
   reports each cut. Works on any document (skill, AGENTS.md, README, design
   doc, PR description). Use for "trim this", "is there anything redundant",
-  "what can you cut from this skill". Use adhd-ify to restructure and
-  unslop-text to fix wording.
+  "what can you cut from this skill". Use unslop to restructure or fix
+  wording.
 ---
 
 # Trim
 
 You own a shorter document that says everything the original said.
 
-Only cut. Never add content, reorder sections, or reword a sentence, except to merge two copies of one point. Note structural or wording problems in the report for the adhd-ify or unslop-text skills instead of fixing them.
+Only cut. Never add content, reorder sections, or reword a sentence, except to merge two copies of one point. Note structural or wording problems in the report for the unslop skill instead of fixing them.
 
 ## 1. Scope
 
@@ -52,4 +52,4 @@ Done when every candidate is marked cut, merged, kept, or conflict.
 
 Done when every verifier finding is restored or matches a planned cut.
 
-**Reply:** the line count before and after, then the cuts grouped as duplicate (with where the kept copy lives), merged, default, and empty, one line each. Then conflicts and any structure or wording problems for the sibling skills. For pasted text, include the trimmed text.
+**Reply:** the line count before and after, then the cuts grouped as duplicate (with where the kept copy lives), merged, default, and empty, one line each. Then conflicts and any structure or wording problems for unslop. For pasted text, include the trimmed text.

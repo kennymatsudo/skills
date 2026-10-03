@@ -1,0 +1,15 @@
+[
+  {"query": "unslop docs/architecture.md, it reads like a chatbot wrote it", "should_trigger": true},
+  {"query": "This onboarding doc is 900 lines of status notes and 'as of' corrections. Make it something a new hire would actually read.", "should_trigger": true},
+  {"query": "deslop this branch before I open the PR, the agent added a bunch of try/excepts and a factory nobody needs", "should_trigger": true},
+  {"query": "the headings in plans/rollout.md are all 'Overview', 'Context', 'Key takeaways' -- fix the doc so it's readable", "should_trigger": true},
+  {"query": "clean up the AI slop in the code I changed on this branch, keep behavior the same", "should_trigger": true, "holdout": true},
+  {"query": "make the README in services/billing readable, it's a wall of text", "should_trigger": true, "holdout": true},
+  {"query": "I just had you write docs/retry-policy.md. Before we save it, strip the AI tells and put the point first.", "should_trigger": true, "holdout": true},
+  {"query": "cut anything redundant from AGENTS.md without changing what it says", "should_trigger": false},
+  {"query": "clean up the docstrings and comments on my diff, don't touch the code", "should_trigger": false},
+  {"query": "review this branch for bugs before I merge", "should_trigger": false},
+  {"query": "write a PR description for the changes on this branch", "should_trigger": false, "holdout": true},
+  {"query": "simplify the retry logic I added in worker.py, it feels over-engineered and I want fewer layers", "should_trigger": false, "holdout": true},
+  {"query": "write a design doc for moving the scheduler to Temporal", "should_trigger": false}
+]
