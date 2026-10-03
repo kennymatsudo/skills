@@ -1,0 +1,16 @@
+{
+  "name": "kskills",
+  "owner": {
+    "name": "Kenny Matsudo"
+  },
+  "metadata": {
+    "description": "Kenny Matsudo's personal agent skills."
+  },
+  "plugins": [
+    {
+      "name": "kskills",
+      "source": "./",
+      "description": "Kenny Matsudo's personal agent skills."
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "name": "kskills",
+  "description": "Kenny Matsudo's personal agent skills.",
+  "author": {
+    "name": "Kenny Matsudo"
+  },
+  "repository": "https://github.com/kennymatsudo/skills",
+  "license": "MIT"
+}
