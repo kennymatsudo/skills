@@ -2,6 +2,33 @@
 
 My personal agent skills, in the [Agent Skills](https://agentskills.io) format. They work with Claude Code, Codex, Cursor, and any other agent the `skills` CLI supports.
 
+## Skills
+
+### General
+
+| Skill | What it does |
+| --- | --- |
+| [clean-up-comments](skills/clean-up-comments/SKILL.md) | Rewrites, deletes, or adds comments on the current diff so they're plain and useful. Never touches code. |
+| [commit](skills/commit/SKILL.md) | Stages changes and commits with a short title and scannable body, folding follow-ups into unpushed commits. |
+| [how](skills/how/SKILL.md) | Explains how a system or code path works, one zoom level at a time, with every claim cited. |
+| [rename-variables](skills/rename-variables/SKILL.md) | Renames identifiers your branch adds, or under a given path, so each is honest and in the repo's vocabulary, updating every reference. |
+| [restate](skills/restate/SKILL.md) | Restates your request in its own words, with the established name for the pattern, and waits for a yes. |
+| [review-design](skills/review-design/SKILL.md) | Reviews a branch or codebase against design principles, domain boundaries, and service layering, and returns a ranked, code-cited report. |
+| [review-tests](skills/review-tests/SKILL.md) | Reviews the tests a branch adds or changes, proves each can fail, catches weakened tests, and applies the safe fixes. |
+| [trim](skills/trim/SKILL.md) | Cuts redundancy from any document without changing what it says. |
+| [unslop](skills/unslop/SKILL.md) | Cleans AI slop out of prose or a code diff so a person wants to read it. |
+| [update-agent-instructions](skills/update-agent-instructions/SKILL.md) | Proposes edits to AGENTS.md, CLAUDE.md, and skills from lessons in the current session. |
+| [why](skills/why/SKILL.md) | Traces why code has its current shape through git, PRs, tickets, and docs, and says whether the reason still holds. |
+
+### Verification
+
+Skills for proving a change works on the running app, not just in tests.
+
+| Skill | What it does |
+| --- | --- |
+| [build-verification](skills/build-verification/SKILL.md) | Sets up and grows a repo's verification kit so an agent can prove a change works on the running app. |
+| [maintain-verification](skills/maintain-verification/SKILL.md) | Audits a repo's verification kit against the code and running app, and fixes the kit's own files. |
+
 ## Install
 
 With the [`skills` CLI](https://skills.sh), for any supported agent:
@@ -48,7 +75,8 @@ Instructions...
 
 1. Create `skills/<skill-name>/SKILL.md`, or run `npx skills init skills/<skill-name>`.
 2. Check it is found: `npx skills add . --list`.
-3. Commit and push. Users get it with `npx skills update` or `/plugin marketplace update`.
+3. Add a row to the matching table under [Skills](#skills).
+4. Commit and push. Users get it with `npx skills update` or `/plugin marketplace update`.
 
 The Claude Code plugin picks up every folder under `skills/` automatically, so the manifests in `.claude-plugin/` need no edits when you add a skill.
 
