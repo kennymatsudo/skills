@@ -1,0 +1,11 @@
+{
+  "purpose": "Updating an open PR whose body is already long and full of code names, after one small new commit. Catches patching the old bullets instead of rewriting.",
+  "setup": "A branch whose diff against main matches pr_body.md's bullets, plus one new small commit on top (for example, the startup log now names only the settings that are blank). pr_body.md is the PR's current body. With no code host available, tell the arm the PR is open against main and its current body is in pr_body.md.",
+  "prompt": "I pushed one more commit to this branch, can you update the PR description? The current description is in pr_body.md and the PR is open against main. There's no gh access here, so just give me the new title and body.",
+  "expect": [
+    "Lead and bullets rewritten from the whole diff, not the old bullets with one edited or appended.",
+    "Lead and bullets together under 150 words, at most six bullets.",
+    "No code identifiers, SQL, or type-checker terms in the bullets unless a reviewer must act on one.",
+    "Ticket link and both manual test plan steps kept as they were."
+  ]
+}

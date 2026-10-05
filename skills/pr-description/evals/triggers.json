@@ -1,0 +1,18 @@
+[
+  {"query": "Write the PR description for this branch, I'm opening it in a few minutes.", "should_trigger": true},
+  {"query": "can u draft a pr body for my changes, the reviewers want context on why we dropped the retry", "should_trigger": true},
+  {"query": "Update the description on my open PR, I pushed two more commits since and it's out of date.", "should_trigger": true},
+  {"query": "I need a good title and summary for the pull request that adds rate limiting to the webhook ingester.", "should_trigger": true, "holdout": true},
+  {"query": "Finish up this branch: run the linter, fix anything it flags, then give me something I can paste into GitHub when I open the PR.", "should_trigger": true},
+  {"query": "The PR template in this repo is long and I never know what to put in it. Fill it in for the current branch.", "should_trigger": true, "holdout": true},
+  {"query": "Rewrite the body of PR #4821 so it's shorter, it reads like an essay right now.", "should_trigger": true},
+  {"query": "what should the pull request say for these changes?", "should_trigger": true, "holdout": true},
+  {"query": "Commit my staged changes with a good message.", "should_trigger": false},
+  {"query": "Squash the commits on this branch into one before I open the PR.", "should_trigger": false},
+  {"query": "Review PR #4821 and leave comments on anything that looks like a bug.", "should_trigger": false, "holdout": true},
+  {"query": "Write release notes for everything merged to main since the v3.2 tag.", "should_trigger": false},
+  {"query": "This README is way too long, cut it down without losing anything important.", "should_trigger": false, "holdout": true},
+  {"query": "Why does the webhook handler swallow this exception? Find the PR that introduced it.", "should_trigger": false},
+  {"query": "Open a PR for this branch against main.", "should_trigger": true, "holdout": true},
+  {"query": "Clean up the AI slop in the description I already wrote for my PR.", "should_trigger": false}
+]
