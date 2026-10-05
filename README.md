@@ -22,6 +22,7 @@ My personal agent skills, in the [Agent Skills](https://agentskills.io) format. 
 | [trim](skills/trim/SKILL.md) | Cuts redundancy from any document without changing what it says. |
 | [unslop](skills/unslop/SKILL.md) | Cleans AI slop out of prose or a code diff so a person wants to read it. |
 | [update-agent-instructions](skills/update-agent-instructions/SKILL.md) | Proposes edits to AGENTS.md, CLAUDE.md, and skills from lessons in the current session. |
+| [walkthrough](skills/walkthrough/SKILL.md) | Walks you through a teammate's PR one layer at a time: why it exists, what changed before and after, and what order to read it in, with every claim cited. |
 | [why](skills/why/SKILL.md) | Traces why code has its current shape through git, PRs, tickets, and docs, and says whether the reason still holds. |
 
 ### Verification

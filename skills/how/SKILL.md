@@ -5,7 +5,7 @@ description: >-
   how they call each other by default, then the components inside one service, then
   the method-by-method path, with every claim cited and checked. Use for "how does X
   work", "walk me through X", "what calls what", "more detail on Y". Use why for the
-  reasoning behind a design.
+  reasoning behind a design, and walkthrough to understand what a PR changed.
 ---
 
 # How

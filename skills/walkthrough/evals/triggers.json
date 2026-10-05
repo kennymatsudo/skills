@@ -1,0 +1,18 @@
+[
+  {"query": "Walk me through PR #2214, Dana asked me to look at it and I've never touched the billing service.", "should_trigger": true},
+  {"query": "what did this PR actually change? https://github.com/acme/api/pull/918", "should_trigger": true},
+  {"query": "I'm picking up the branch feature/retry-queue from a teammate who's out. Help me understand what they changed and why before I keep going.", "should_trigger": true},
+  {"query": "Can you explain PR 4402 to me? Not a review, I just want to know what it does before standup.", "should_trigger": true, "holdout": true},
+  {"query": "Check out PR #77, summarize what it changes, then tell me which of its files I should read first.", "should_trigger": true},
+  {"query": "My lead merged a big refactor of the auth middleware yesterday (PR #3310). Get me up to speed on it.", "should_trigger": true, "holdout": true},
+  {"query": "help me understand the changes on this branch vs main, I didn't write them", "should_trigger": true, "holdout": true},
+  {"query": "Before I approve PR #512 I want to know what it's trying to do and what order to read the diff in.", "should_trigger": true},
+  {"query": "Review PR #2214 and leave comments on anything that looks like a bug.", "should_trigger": false},
+  {"query": "Walk me through how the billing service charges a card, from the API call to the payment provider.", "should_trigger": false, "holdout": true},
+  {"query": "Write the PR description for my branch, I'm opening it in a few minutes.", "should_trigger": false},
+  {"query": "Why does the retry queue sleep for 30 seconds? Find the PR that added it.", "should_trigger": false},
+  {"query": "Squash the commits on this branch into one before I open the PR.", "should_trigger": false, "holdout": true},
+  {"query": "Do a design review of my branch, I think the service layering is off.", "should_trigger": false},
+  {"query": "Summarize everything merged to main this week for the team newsletter.", "should_trigger": false, "holdout": true},
+  {"query": "Find security problems in the changes on this PR before it ships.", "should_trigger": false}
+]
