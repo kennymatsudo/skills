@@ -10,6 +10,7 @@ My personal agent skills, in the [Agent Skills](https://agentskills.io) format. 
 | --- | --- |
 | [clean-up-comments](skills/clean-up-comments/SKILL.md) | Rewrites, deletes, or adds comments on the current diff so they're plain and useful. Never touches code. |
 | [commit](skills/commit/SKILL.md) | Stages changes and commits with a short title and scannable body, folding follow-ups into unpushed commits. |
+| [create-skill](skills/create-skill/SKILL.md) | Creates, adapts, or edits a skill, validates it, and proves it beats a baseline in headless test runs with cost measured. |
 | [how](skills/how/SKILL.md) | Explains how a system or code path works, one zoom level at a time, with every claim cited. |
 | [rename-variables](skills/rename-variables/SKILL.md) | Renames identifiers your branch adds, or under a given path, so each is honest and in the repo's vocabulary, updating every reference. |
 | [restate](skills/restate/SKILL.md) | Restates your request in its own words, with the established name for the pattern, and waits for a yes. |
