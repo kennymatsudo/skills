@@ -15,6 +15,7 @@ My personal agent skills, in the [Agent Skills](https://agentskills.io) format. 
 | [restate](skills/restate/SKILL.md) | Restates your request in its own words, with the established name for the pattern, and waits for a yes. |
 | [review-design](skills/review-design/SKILL.md) | Reviews a branch or codebase against design principles, domain boundaries, and service layering, and returns a ranked, code-cited report. |
 | [review-tests](skills/review-tests/SKILL.md) | Reviews the tests a branch adds or changes, proves each can fail, catches weakened tests, and applies the safe fixes. |
+| [squash](skills/squash/SKILL.md) | Squashes a branch's unpushed commits, or the whole branch including pushed ones, into one commit describing the net result. |
 | [trim](skills/trim/SKILL.md) | Cuts redundancy from any document without changing what it says. |
 | [unslop](skills/unslop/SKILL.md) | Cleans AI slop out of prose or a code diff so a person wants to read it. |
 | [update-agent-instructions](skills/update-agent-instructions/SKILL.md) | Proposes edits to AGENTS.md, CLAUDE.md, and skills from lessons in the current session. |
