@@ -12,6 +12,7 @@ My personal agent skills, in the [Agent Skills](https://agentskills.io) format. 
 | [commit](skills/commit/SKILL.md) | Stages changes and commits with a short title and scannable body, folding follow-ups into unpushed commits. |
 | [create-skill](skills/create-skill/SKILL.md) | Creates, adapts, or edits a skill, validates it, and proves it beats a baseline in headless test runs with cost measured. |
 | [how](skills/how/SKILL.md) | Explains how a system or code path works, one zoom level at a time, with every claim cited. |
+| [polish](skills/polish/SKILL.md) | Polishes a finished branch in one run: applies strong design-review refactors, then reviews tests, renames, cuts code slop, cleans comments, and tidies docs, leaving it uncommitted. |
 | [rename-variables](skills/rename-variables/SKILL.md) | Renames identifiers your branch adds, or under a given path, so each is honest and in the repo's vocabulary, updating every reference. |
 | [restate](skills/restate/SKILL.md) | Restates your request in its own words, with the established name for the pattern, and waits for a yes. |
 | [review-design](skills/review-design/SKILL.md) | Reviews a branch or codebase against design principles, domain boundaries, and service layering, and returns a ranked, code-cited report. |
