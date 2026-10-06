@@ -5,8 +5,8 @@ description: >-
   check that each can fail when its behavior breaks, expects what the intended
   contract says rather than what the code returns, wasn't weakened to pass, and
   isn't a duplicate, then apply the safe fixes. Use for "review the tests",
-  "are these tests any good", "check the tests before I commit". Use a code
-  review for bugs in the code itself.
+  "are these tests any good", "check the tests before I commit". Use
+  review-pr for bugs in the code itself.
 disable-model-invocation: true
 ---
 

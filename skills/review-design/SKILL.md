@@ -6,7 +6,7 @@ description: >-
   per principle in parallel, a checking pass that must
   cite code to keep or drop each finding, then a ranked report you can act on here
   or hand off. Use for "design review", "review the design of my branch", "what
-  should I refactor", "review this service's structure". Use a code review for bugs.
+  should I refactor", "review this service's structure". Use review-pr for bugs.
 disable-model-invocation: true
 ---
 

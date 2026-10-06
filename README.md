@@ -17,6 +17,7 @@ My personal agent skills, in the [Agent Skills](https://agentskills.io) format. 
 | [rename-variables](skills/rename-variables/SKILL.md) | Renames identifiers your branch adds, or under a given path, so each is honest and in the repo's vocabulary, updating every reference. |
 | [restate](skills/restate/SKILL.md) | Restates your request in its own words, with the established name for the pattern, and waits for a yes. |
 | [review-design](skills/review-design/SKILL.md) | Reviews a branch or codebase against design principles, domain boundaries, and service layering, and returns a ranked, code-cited report. |
+| [review-pr](skills/review-pr/SKILL.md) | Reviews a PR for defects it introduces: checks the ticket's intent and the code upstream and downstream, proves each finding with a failing test or a code trace, and reports a short list with no nits. |
 | [review-tests](skills/review-tests/SKILL.md) | Reviews the tests a branch adds or changes, proves each can fail, catches weakened tests, and applies the safe fixes. |
 | [squash](skills/squash/SKILL.md) | Squashes a branch's unpushed commits, or the whole branch including pushed ones, into one commit describing the net result. |
 | [trim](skills/trim/SKILL.md) | Cuts redundancy from any document without changing what it says. |

@@ -7,7 +7,7 @@ description: >-
   with every claim cited and checked. Read-only; never reviews for bugs or
   posts to the PR. Use for "walk me through PR #123", "what did this PR
   change", "help me understand this PR", "explain this branch's changes".
-  Use how for how existing code works, and code review for finding problems.
+  Use how for how existing code works, and review-pr for finding problems.
 ---
 
 # Walkthrough
