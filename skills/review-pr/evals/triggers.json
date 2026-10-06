@@ -1,0 +1,18 @@
+[
+  {"query": "Review PR #2214 and tell me if anything in it is actually broken. Dana wants a second pair of eyes before merging.", "should_trigger": true},
+  {"query": "can you review this PR? https://github.com/acme/api/pull/918", "should_trigger": true},
+  {"query": "Is feature/retry-queue safe to merge? It touches the payment retry path and I'm nervous about double charges.", "should_trigger": true},
+  {"query": "Find bugs in the changes on this branch compared to main before I ask for review.", "should_trigger": true, "holdout": true},
+  {"query": "I've been asked to review PR 4402, which changes how we paginate the orders API. Check whether it breaks any of the clients.", "should_trigger": true},
+  {"query": "Review PR #77 against its Jira ticket and leave comments on anything that's wrong.", "should_trigger": true, "holdout": true},
+  {"query": "code review PR 3310 please, it's the auth middleware rewrite", "should_trigger": true, "holdout": true},
+  {"query": "Before I approve #512, look for anything in it that would lose data or break the downstream consumers.", "should_trigger": true},
+  {"query": "Walk me through PR #2214, I've never touched the billing service and just want to understand it.", "should_trigger": false},
+  {"query": "Do a design review of my branch, I think the service layering is off.", "should_trigger": false},
+  {"query": "Review the tests I just added on this branch, are they any good?", "should_trigger": false},
+  {"query": "Write the PR description for my branch, I'm opening it in a few minutes.", "should_trigger": false, "holdout": true},
+  {"query": "Why does the retry queue sleep for 30 seconds? Find the PR that added it.", "should_trigger": false},
+  {"query": "Polish my branch, I'm done implementing the retry queue.", "should_trigger": false, "holdout": true},
+  {"query": "Summarize the review comments people left on PR #918 so I can address them.", "should_trigger": false},
+  {"query": "Fix the bug in refund() that the reviewer flagged on my PR.", "should_trigger": false, "holdout": true}
+]
