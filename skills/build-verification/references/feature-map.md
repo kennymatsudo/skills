@@ -59,3 +59,27 @@ Rules the script enforces:
 - Every path or command named in backticks under "How to prove it" exists in the repo.
 
 An optional `## Request flow` section may sit before "How to prove it" when the code path is not obvious. Keep the rest of the file about what the user does and sees.
+
+## Requirements coverage: `features/requirements.md`
+
+Optional. Add it when the project has a requirements source, such as a launch checklist, spec, or design docs, so maintain-verification can find requirements that never became a sub-feature. It holds only the mapping; the requirements live in their source and the behaviors in the feature files.
+
+```markdown
+# Requirements coverage
+
+Source: <link to the requirements document>. Checked <date> against the source as updated <date>.
+
+## Clauses
+
+- A paid order sends one receipt | Launch checklist, row 4 | ids: checkout.pay, checkout.receipt
+- Refunds return to the original card | Launch checklist, row 7 | No check yet
+- Gift cards apply before tax | Pricing design doc, Taxes | not in source
+- Orders over $10k need review | Launch checklist, row 9 | blocked on decision: review threshold
+- Partial refunds | Launch checklist, row 8 | out of scope: phase 1
+
+## Conflicts with the source
+
+- Row 12 asks for a second receipt on refund; `billing/refund.py:88` sends none by design. Proposed edit: "Refunds send no receipt; the order page shows the refund."
+```
+
+Each clause line is `- <clause> | <source> | <outcome>`, where the outcome is `ids: <sub-feature IDs>`, `No check yet`, `not in source`, `blocked on decision: <decision>`, or `out of scope: <reason>`. `check.py` checks the form and that every ID exists.

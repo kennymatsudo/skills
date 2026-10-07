@@ -21,6 +21,9 @@ INDEX_LINK = re.compile(r"\]\(([^)#]+\.md)\)")
 BACKTICK = re.compile(r"`([^`]+)`")
 REQUIRED = ["Sub-features", "How a user reaches it", "How to prove it", "Gotchas"]
 OPTIONAL = ["Request flow"]
+REQUIREMENTS = "requirements.md"
+CLAUSE = re.compile(r"^- (.+?) \| (.+?) \| (.+)$")
+OUTCOME = re.compile(r"^(ids: .+|No check yet|not in source|blocked on decision: .+|out of scope: .+)$")
 
 
 def sections(text):
@@ -111,6 +114,28 @@ def check_feature(path, repo_root, seen_ids, errors):
     return commands
 
 
+def check_requirements(path, seen_ids, errors):
+    order, body = sections(path.read_text())
+    if "Clauses" not in body:
+        errors.append(f"{REQUIREMENTS}: no '## Clauses' section")
+        return
+    for line in body["Clauses"]:
+        if not line.startswith("- "):
+            continue
+        match = CLAUSE.match(line)
+        if not match:
+            errors.append(f"{REQUIREMENTS}: clause line is not '- <clause> | <source> | <outcome>': {line}")
+            continue
+        outcome = match.group(3).strip()
+        if not OUTCOME.match(outcome):
+            errors.append(f"{REQUIREMENTS}: unknown outcome '{outcome}' for: {match.group(1)}")
+            continue
+        if outcome.startswith("ids: "):
+            for sub_id in (part.strip() for part in outcome[5:].split(",")):
+                if sub_id not in seen_ids:
+                    errors.append(f"{REQUIREMENTS}: {sub_id} is not a sub-feature in the map")
+
+
 def git(repo_root, *args):
     result = subprocess.run(["git", "-C", str(repo_root), *args], capture_output=True, text=True)
     return result.stdout.strip() if result.returncode == 0 else None
@@ -158,8 +183,8 @@ def main():
     repo_root = Path(git(args.kit_dir, "rev-parse", "--show-toplevel") or args.kit_dir)
 
     errors = []
-    linked = {link.lstrip("./") for link in INDEX_LINK.findall(index.read_text())}
-    files = {p.name for p in features_dir.glob("*.md") if p.name != "README.md"}
+    linked = {link.lstrip("./") for link in INDEX_LINK.findall(index.read_text())} - {REQUIREMENTS}
+    files = {p.name for p in features_dir.glob("*.md") if p.name not in ("README.md", REQUIREMENTS)}
     for missing in sorted(linked - files):
         errors.append(f"README.md links {missing}, which does not exist")
     for unlisted in sorted(files - linked):
@@ -168,6 +193,8 @@ def main():
     seen_ids, commands = {}, {}
     for name in sorted(files):
         commands.update(check_feature(features_dir / name, repo_root, seen_ids, errors))
+    if (features_dir / REQUIREMENTS).is_file():
+        check_requirements(features_dir / REQUIREMENTS, seen_ids, errors)
 
     for error in errors:
         print(f"ERROR {error}")
