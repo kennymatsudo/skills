@@ -86,7 +86,7 @@ Done when every sub-feature has a live result: passed, failed, or not run with a
 Sort every finding:
 
 - **Map drift:** the feature file describes the app wrongly. Fix the file.
-- **Kit gap:** working behavior the kit cannot drive or read. Fix the tool, following `rules.md`, and re-drive it live.
+- **Kit gap:** working behavior the kit cannot drive or read. Fix the tool, following `rules.md`, and re-drive it live. A flake seen twice is a kit gap until its cause is found: add the diagnostic that names the cause before retrying.
 - **Product bug:** the app is broken. Record it with the failing step and evidence. Never edit product code or soften the map to hide it.
 
 Run `check.py` again after the fixes.

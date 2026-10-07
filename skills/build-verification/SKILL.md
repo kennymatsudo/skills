@@ -26,7 +26,7 @@ Done when you know which branch you are on.
 
 ## 2. Discover
 
-Spawn a read-only subagent on a mid-tier model with the prompt in `references/discovery-prompt.md`. Spot-check two of its citations. Ask the user only what the repo could not answer, one question at a time with your recommendation. Always confirm with the user anything that needs a human to start the app and anything with a real side effect.
+Spawn a read-only subagent on a mid-tier model with the prompt in `references/discovery-prompt.md`. Spot-check two of its citations. Ask the user only what the repo could not answer, one question at a time with your recommendation. Always confirm with the user anything that needs a human to start the app and anything with a real side effect. Before calling a step human-only, read its script: it needs a human only when it prompts, needs their login or credentials, or has a side effect they have not approved.
 
 Done when each of the ten discovery questions has a cited answer or the user's answer.
 

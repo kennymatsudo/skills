@@ -66,6 +66,7 @@ A check proves one or more sub-features by driving the real entry point and read
 - **Evidence before cleanup.** Write the evidence file before any cleanup, through a temporary file and a rename. Cleanup removes only what this run created and never deletes evidence.
 - **No verdict without a check.** A run that only observed, or stopped early, saves `passed: null`. Null is never reported as a pass.
 - **Count only fresh events.** A step that waits for an event counts only events that arrived after the step started.
+- **Wait for the state.** A step that judges what a page or a polled service shows waits up to one refresh cycle for the expected state, rather than sampling once.
 - **Wanted but not built.** A check for behavior the team wants and has not shipped stays in the kit and fails. Report it as Failed with its tracking issue. When it starts passing, the run says so, so the tracking note gets removed. A failing step never stops independent steps after it.
 - **Break-tested.** A check counts as proven only after it failed on a planned break: a scratch copy with the behavior reverted. Record the break in the feature file.
 - **Exit codes.** 0 passed. 1 a step failed. 2 stopped or could not run.
