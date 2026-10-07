@@ -20,6 +20,12 @@ Pick the question an agent would otherwise answer with raw SQL or curl. Name the
 
 **Proof:** run it on a real ID (exit 0, show the JSON) and on a made-up ID (exit 1, show the hint). Confirm it only reads: for a database, the transaction is read-only; for HTTP, the method is GET.
 
+## Invariant
+
+Pick a rule a user or operator would call a bug whenever it breaks, whatever led there: one live session per user, a stored message appears once, two systems agree on a record's state. Draft candidates from the design docs, the data model's uniqueness and ownership rules, and the state transitions in the code. Give each its kind per `rules.md`. Wire the probe that reads the same state to list violations under `problems`.
+
+**Proof:** run the probe on a healthy real record (no violations). Then make a planned break in a scratch worktree, as for a check, and show the violation it reports. Pure judging functions also get unit tests with one passing and one breaking state each.
+
 ## Action
 
 Use the same entry point a real user or operator uses. Decide with the user whether it needs the ask flag: anything outside this machine, shared, paid, or rate-limited does. Record how it decides ownership.
@@ -43,3 +49,9 @@ If the running app cannot be pointed at a scratch worktree (one instance per mac
 ## Scenario
 
 A scenario is a check that walks several sub-features in one user journey. Build it only when the user asks or when the steps cannot run apart (each depends on state from the last). Give it its own feature file that links to the per-feature files, and prove it like a check, with one planned break per sub-feature it claims.
+
+## Exploration setup
+
+Build this when the explore-bugs skill asks for it or the user asks to set up exploration. Write `exploration.json` from the template in `rules.md`. Build at least three invariants. Add a probe `problems` list if the kit has none.
+
+**Proof:** each invariant's proof, and `python3 <explore-bugs directory>/scripts/ledger.py --kit <kit> summary` exits 0. When explore-bugs is not installed, show `exploration.json` parses and has `ledger`.

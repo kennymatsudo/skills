@@ -4,8 +4,9 @@ description: >-
   Set up and grow a repo's verification kit: the tools, feature map, and rules
   that let an agent prove a change on the running app with evidence. Sets up the
   kit when none exists, builds what an outcome needs ("prove checkout works"),
-  or suggests what to add next. Every piece proves itself, and checks must fail on
-  a planned break. Use maintain-verification to audit an existing kit.
+  or suggests what to add next, including the invariants and ledger settings
+  explore-bugs needs. Every piece proves itself, and checks must fail on a
+  planned break. Use maintain-verification to audit an existing kit.
 disable-model-invocation: true
 ---
 
@@ -49,6 +50,7 @@ Done when you have shown the doctor's output and `check.py` exits 0. Then reply,
 
 ## 5. Choose what to build
 
+- **The user or explore-bugs asked for exploration setup:** the pieces are the ones under "Exploration setup" in `references/pieces.md`.
 - **The user named an outcome** ("prove checkout works", "let agents see order state"): translate it into pieces, for example "feature file for checkout, a probe for order state, a check for checkout.pay". Read `features/` first and reuse what exists. The named outcome is the go-ahead to build them.
 - **The user asked what to add, or named nothing:** spawn a read-only subagent on a mid-tier model with the prompt in `references/suggest-prompt.md`. If a ticket tracker is connected, give it recent bugs for the app. Show the top three to five suggestions in plain words with their reasons, and let the user pick.
 

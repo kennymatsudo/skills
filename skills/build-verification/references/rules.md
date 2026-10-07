@@ -6,6 +6,19 @@ Copy this file into the kit as `rules.md`. Replace each `<...>` with what the re
 
 Every result records which code produced it: commit, branch, whether the tree was dirty, and whether that commit is on the main branch. Anything unreadable counts as not main. A pass on a commit that is not on main is reported with its branch and extra commits, never as a pass on main.
 
+## Lanes
+
+Each lane proves more than the one before and costs more. Climb only as far as the claim needs, and name the lane in every result.
+
+| Lane | Who may run it | What it can prove |
+| -- | -- | -- |
+| 1. Unit | Agent, always | `<the code's own logic, with external systems mocked>` |
+| 2. Local read | Agent, once the doctor passes | `<state that already exists, read through probes>` |
+| 3. Real system | Agent, only with the ask flag | `<behavior that crosses a real external or shared system>` |
+| 4. Human action | `<the user, or an action through the real operator API>` | `<what only a person or operator can trigger>` |
+
+A lane cannot prove a claim about a system it mocks. Report such a claim as not verified and name the lane that would settle it.
+
 ## Doctor
 
 `<doctor command>` is read-only. It answers one question: is this instance worth driving?
@@ -21,9 +34,18 @@ A probe answers a question about current state. `<probe command> <question> <arg
 - **Read-only.** Database reads run in a read-only transaction. HTTP calls are GET only.
 - **One JSON object on stdout.** Concise by default, with `--full` for the raw object.
 - **Exit codes.** 0 answered. 1 not found, with `{"not_found": ..., "hint": ...}`. 2 could not answer, with `STOPPED: <reason>` on stderr.
-- **Hints.** `next` lists follow-up probe commands. `problems` lists inconsistencies the probe noticed. Treat both as leads, not verdicts.
+- **Hints.** `next` lists follow-up probe commands. `problems` lists each invariant the current state breaks, with its name and kind. Confirm every entry with the read it names before reporting it.
 - **Secrets.** Redact any value whose key looks like a secret, token, or password.
 - **Shared reads.** A check that needs the same fact calls the same read function the probe uses, so a probe can re-check any verdict.
+
+## Invariants
+
+An invariant is a rule that holds whatever happened, written as code in `<invariants module>`. It judges any state, including one no check anticipated, so probes, checks, and exploration ask the same question the same way.
+
+- **One function per state it judges,** taking state the caller already read and returning violations, each with the invariant's name, its kind, and a detail. It reads nothing itself.
+- **Kinds.** `safety` must hold at every moment: a violation is a break. `eventual` holds once the app settles (`<settle signal>`): a violation right after an action may be lag, so recheck after it settles. `lead` is worth a look and wrong only if it repeats or breaks another rule.
+- **Missing versus empty.** A value that could not be read is not judged. A value read and found absent is.
+- **Break-tested.** Each invariant reports a violation on a planned break, like a check.
 
 ## Actions
 
@@ -44,8 +66,22 @@ A check proves one or more sub-features by driving the real entry point and read
 - **Evidence before cleanup.** Write the evidence file before any cleanup, through a temporary file and a rename. Cleanup removes only what this run created and never deletes evidence.
 - **No verdict without a check.** A run that only observed, or stopped early, saves `passed: null`. Null is never reported as a pass.
 - **Count only fresh events.** A step that waits for an event counts only events that arrived after the step started.
+- **Wanted but not built.** A check for behavior the team wants and has not shipped stays in the kit and fails. Report it as Failed with its tracking issue. When it starts passing, the run says so, so the tracking note gets removed. A failing step never stops independent steps after it.
 - **Break-tested.** A check counts as proven only after it failed on a planned break: a scratch copy with the behavior reverted. Record the break in the feature file.
 - **Exit codes.** 0 passed. 1 a step failed. 2 stopped or could not run.
+
+## Exploration
+
+`exploration.json` in the kit holds the settings the explore-bugs skill reads:
+
+```json
+{
+  "ledger": "<evidence dir>/exploration-ledger.jsonl",
+  "kinds": ["timing", "order", "identity", "input-shape", "lifecycle", "external-side", "code-reading"]
+}
+```
+
+The ledger lives beside the evidence it points at.
 
 ## Evidence
 
@@ -74,6 +110,6 @@ Each check run writes one JSON file to `<evidence dir>/<check>-<timestamp>.json`
 
 Report each sub-feature as one of:
 
-- **Verified:** the check, the entry point, the evidence file, and the code line.
+- **Verified:** the check, its lane, the entry point, the evidence file, and the code line.
 - **Failed:** the step that failed and what it read.
 - **Not verified:** why. Name the missing check, or the blocker (account, entitlement, OS, external state, human-only start) and the route tried. Never report a skipped entry point as verified through a different one.
