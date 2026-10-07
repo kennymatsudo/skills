@@ -61,7 +61,9 @@ Fix now, on a new branch `audit-harness-checks/<date>`:
 
 Prove each new or changed test red-green: it fails against the broken copy and passes against the real code. A fix to a check needs a test too, one that fails when the fix is reverted. Then hand every new or changed test to a fresh verifier with the same break, so the audit cannot add a useless test of its own.
 
-Leave for the developer, with a recommendation each: deleting a test or check, changing an expected value, a new check, invariant, or probe command, a change to what a read returns when it succeeds, anything `PLAUSIBLE`, and any fix in another repo. Never loosen an assertion or change an expectation to turn a run green; a bug stays failing with the correct expectation and goes to the ticket tracker.
+Leave for the developer, with a recommendation each: deleting a test or check, changing an expected value, a new check, invariant, or probe command, a change to what a read returns when it succeeds, anything `PLAUSIBLE`, and any fix in another repo.
+
+Never loosen an assertion or change an expectation to turn a run green; a bug stays failing with the correct expectation and goes to the ticket tracker.
 
 Rerun the unit suite and `weakened.py --since <branch base>` on your own diff; any lead it prints must be one you justify in the readout. Commit only this audit's hunks, titled `Audit harness checks: <one-line summary>`; the next audit finds its starting point from that title. Do not push.
 

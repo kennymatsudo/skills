@@ -33,7 +33,9 @@ Read the harness's current coverage: its feature or scenario docs, and the open 
 - **Add with a missing step**: it belongs, but no current step reaches the situation. Name the step to build; build it now if the developer agrees, rather than deferring.
 - **Skip**: one component's code decides the outcome, even when the harness could drive it, so the PR's own unit tests are its home; or the harness would have to fake the very failure it tests.
 
-A check for behavior the PR does not deliver yet still goes in now and fails until it does, but only when it names the ticket or pull request that will make it pass, and it reports when it starts passing so that note gets removed. Present the claims in the PR's order, not grouped by verdict. For each verdict give a one-line reason, and for each Add, where it lands and what it costs to run (time, shared resources, side effects). Ask the developer to approve the list. Approving it is the go-ahead for exactly the runs and side effects it names.
+A check for behavior the PR does not deliver yet still goes in now and fails until it does, but only when it names the ticket or pull request that will make it pass, and it reports when it starts passing so that note gets removed.
+
+Present the claims in the PR's order, not grouped by verdict. For each verdict give a one-line reason, and for each Add, where it lands and what it costs to run (time, shared resources, side effects). Ask the developer to approve the list. Approving it is the go-ahead for exactly the runs and side effects it names.
 
 Done when every claim has a verdict and a reason, and the developer has approved the list.
 

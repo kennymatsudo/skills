@@ -1,6 +1,6 @@
 # Refuter prompt
 
-Spawn one subagent with a fresh context on a mid-tier model. Give it only this prompt, filled in. Do not include your own reasoning about why the break is real.
+Give the subagent only this prompt, filled in. Do not include your own reasoning about why the break is real.
 
 ---
 

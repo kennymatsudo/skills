@@ -1,6 +1,6 @@
 # Rubric
 
-Each item names a way a check can pass without earning it. Cite the ID in a finding.
+Each item names a way a check can pass without earning it.
 
 ## Scenario and UI checks
 

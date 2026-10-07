@@ -1,6 +1,6 @@
 # Verifier prompt
 
-Fill in the bracketed parts. Pass each finding's location, claim, and failure scenario only, never the finder's reasoning.
+Fill in the bracketed parts.
 
 > Each item below claims a check or test in this project's harness passes when the behavior it guards is broken. Prove or refute each one. Do not edit the project tree, run live scenarios, or call any external service.
 >
