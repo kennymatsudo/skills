@@ -35,6 +35,7 @@ Skills for proving a change works on the running app, not just in tests.
 | [build-verification](skills/build-verification/SKILL.md) | Sets up and grows a repo's verification kit so an agent can prove a change works on the running app. |
 | [maintain-verification](skills/maintain-verification/SKILL.md) | Audits a repo's verification kit against its requirements, the code, and the running app, and fixes the kit's own files. |
 | [explore-bugs](skills/explore-bugs/SKILL.md) | Runs one round of exploratory testing to find bugs nobody wrote down, confirms each break, turns it into a failing check, and records the round in a ledger. |
+| [review-against-harness](skills/review-against-harness/SKILL.md) | Tests a teammate's PR against the end-to-end harness: decides which of its claims belong there, builds those checks, runs them on the PR's build, sorts the failures, and drafts a PR comment. |
 
 ## Install
 
