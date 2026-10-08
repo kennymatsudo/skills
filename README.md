@@ -25,6 +25,7 @@ My personal agent skills, in the [Agent Skills](https://agentskills.io) format. 
 | [update-agent-instructions](skills/update-agent-instructions/SKILL.md) | Proposes edits to AGENTS.md, CLAUDE.md, and skills from lessons in the current session. |
 | [walkthrough](skills/walkthrough/SKILL.md) | Walks you through a teammate's PR one layer at a time: why it exists, what changed before and after, and what order to read it in, with every claim cited. |
 | [why](skills/why/SKILL.md) | Traces why code has its current shape through git, PRs, tickets, and docs, and says whether the reason still holds. |
+| [wut](skills/wut/SKILL.md) | Restates the agent's last reply, or one part of it, as the bottom line plus a few plain bullets, with jargon swapped out. |
 
 ### Verification
 
