@@ -2,9 +2,13 @@
 
 Copy this file into the kit as `rules.md`. Replace each `<...>` with what the repo uses, and delete any section for a kind of piece the kit does not have yet. Every piece in the kit follows these rules. A piece that cannot follow one names the exception in its own help text and in the feature file that uses it.
 
+## Project workflow
+
+Requirements source: `<source or none>`. Coverage map: `<existing location, features/requirements.md, or none>`. Current results: `<existing location or status.md>`. Evidence: `<location>`. Use the user's declared workflow and existing project conventions before these defaults; keep these pointers current so every skill uses the same homes.
+
 ## Code under test
 
-Every result records which code produced it: commit, branch, whether the tree was dirty, and whether that commit is on the main branch. Anything unreadable counts as not main. A pass on a commit that is not on main is reported with its branch and extra commits, never as a pass on main.
+Every result records which version produced it. For Git code, record the commit, branch, dirty state, and whether the commit is on the relevant default branch. An unreadable version is unknown. A pass on one version is evidence only for that version.
 
 ## Lanes
 
@@ -18,6 +22,7 @@ Each lane proves more than the one before and costs more. Climb only as far as t
 | 4. Human action | `<the user, or an action through the real operator API>` | `<what only a person or operator can trigger>` |
 
 A lane cannot prove a claim about a system it mocks. Report such a claim as not verified and name the lane that would settle it.
+Before a live run, check that the running processes use the checkout under test. A stale process makes the verdict invalid even if the check passes.
 
 ## Doctor
 
@@ -108,6 +113,8 @@ Each check run writes one JSON file to `<evidence dir>/<check>-<timestamp>.json`
 `passed` is `true`, `false`, or `null`. `stopped` holds the reason when the run stopped early. `created` lists what cleanup may remove.
 
 ## Reporting
+
+Read the current results home named under Project workflow before a run. Afterward, update it with the exact version tested, outcome, evidence, and any new limit on what a pass means. Feature files describe intended behavior; the results home records what happened.
 
 Report each sub-feature as one of:
 

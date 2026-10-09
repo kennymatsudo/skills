@@ -183,10 +183,13 @@ def main():
     repo_root = Path(git(args.kit_dir, "rev-parse", "--show-toplevel") or args.kit_dir)
 
     errors = []
-    linked = {link.lstrip("./") for link in INDEX_LINK.findall(index.read_text())} - {REQUIREMENTS}
+    index_text = index.read_text()
+    _, index_sections = sections(index_text)
+    linked = {link.lstrip("./") for link in INDEX_LINK.findall("\n".join(index_sections.get("Features", [])))}
+    for link in set(INDEX_LINK.findall(index_text)):
+        if "://" not in link and not (features_dir / link).is_file():
+            errors.append(f"README.md links {link}, which does not exist")
     files = {p.name for p in features_dir.glob("*.md") if p.name not in ("README.md", REQUIREMENTS)}
-    for missing in sorted(linked - files):
-        errors.append(f"README.md links {missing}, which does not exist")
     for unlisted in sorted(files - linked):
         errors.append(f"{unlisted} is not listed in README.md")
 

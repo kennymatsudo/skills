@@ -30,6 +30,8 @@ My personal agent skills, in the [Agent Skills](https://agentskills.io) format. 
 
 Skills for proving a change works on the running app, not just in tests.
 
+The verification kit has a default layout but follows a project's existing workflow. It keeps requirements, feature claims, and current results distinct, and ties every result to the version and behavior actually tested.
+
 | Skill | What it does |
 | --- | --- |
 | [build-verification](skills/build-verification/SKILL.md) | Sets up and grows a repo's verification kit so an agent can prove a change works on the running app. |

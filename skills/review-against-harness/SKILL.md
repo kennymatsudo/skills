@@ -26,7 +26,7 @@ Done when every claim in the description is on the list, and the list names the 
 
 ## 2. Gate each claim
 
-Read the harness's current coverage: its feature or scenario docs, and the open findings and untested cases in its status file. Then decide every claim on the list as one of:
+Read the harness's current coverage: its feature or scenario docs, and the open findings and untested cases in its chosen results home. Then decide every claim on the list as one of:
 
 - **Add**: the outcome depends on two or more services or components agreeing, or on real timing between them (a poll, a webhook, a send in flight), and no current check proves it. Name the components, and the break the check would catch that no single component's own tests could. If you can only name a break inside one component, the claim is a Skip, even when reaching the situation takes several services.
 - **Already covered**: a current check proves it. Name the check with its `file:line`, and plan to rerun it on the PR's build. When a check covers only part of the claim, say which part, and gate the rest. Before saying no check covers something, search the check code for it.
@@ -49,7 +49,7 @@ Done when the unit suite passes and each new check fails with its behavior rever
 
 Load the PR's code into the stack the way the harness's docs say for that repo, then run the approved scenarios. Before handing any step to the developer as one only they can run, read the command's script: a step needs them only when it prompts, needs their login or credentials, or has a side effect they have not approved. Run everything else yourself.
 
-Confirm each run's evidence names the PR's head commit. Rerun a failure once on the PR's build before judging it, and report every rerun.
+Confirm each run's evidence names the PR's head commit and any other component versions it depended on. Decide reruns from the evidence: rerun only when it points to a stack or harness cause, and report every rerun. A failed product check may already have enough evidence to compare with the base build.
 
 Done when each approved scenario has finished on the PR's head commit, and every checkout and service is back where it started.
 
@@ -57,23 +57,24 @@ Done when each approved scenario has finished on the PR's head commit, and every
 
 For every failed check, decide one:
 
-- **PR defect**: it fails again on the rerun, and the same check passes on the base build (the status file's last base result, or a base run). Run the base only for failures.
-- **Already tracked**: the failure is an open finding in the status file or a ticket the PR names.
+- **PR defect**: the same check passes on the base build (a comparable recorded result, or a base run) and fails on the PR's build. Run the base only for failures. The comparison must use equivalent entry points and external conditions.
+- **Already tracked**: the failure is an open finding in the project's results home or a ticket the PR names.
 - **Harness problem**: the screenshot, trace, or stored state shows the product did the right thing, and the check judged it wrong. Fix the check, say so, and do not count the run as evidence for that claim.
-- **Flake or stack problem**: it did not repeat, or the run never reached the claim (a redirect, a stopped service, a stale checkout). Its later checks are void. The same flake twice is a harness problem until its cause is found: add the diagnostic that would name the cause before retrying again.
+- **Flake or stack problem**: a rerun disagrees, or the run never reached the claim (a redirect, a stopped service, a stale checkout). Its later checks are void. The same flake twice is a harness problem until its cause is found: add the diagnostic that would name the cause before retrying again.
+- **Unresolved**: the check failed on the PR, but a comparable base result is unavailable and the evidence cannot place it in the other categories. Name the base check needed.
 
-Done when every failure has one of the four with the evidence that decided it, and any verdict resting on a single run says so.
+Done when every failure has one verdict with the evidence that decided it.
 
 ## 6. Report
 
-Update the harness's status file, if it has one: a results row for the PR's commit, and the open findings and untested cases the run changed. Draft the PR comment:
+Update the harness's chosen results home, if it has one: a results row for the PR's commit, and the open findings and untested cases the run changed. Draft the PR comment:
 
 - One line on how it was tested and the commit.
-- **Passed**, **Failed on this PR**, **Failed, tracked elsewhere**, and **Not tested end to end**, each claim named by what the user sees, with the PR's section number in brackets. A "not tested" line says what was not proven, not that a run failed.
+- **Passed**, **Failed on this PR**, **Failed, tracked elsewhere**, **Unresolved failure**, and **Not tested end to end**, each claim named by what the user sees, with the PR's section number in brackets. An unresolved failure names the base check needed. A "not tested" line says what was not proven, not that a run failed.
 - Anything the PR changes that a reader would not expect, under **Worth knowing**.
 
 Show the draft. Post or edit the comment only when the developer says to, then link it.
 
-Done when the status file is updated and the comment is drafted, or posted on the developer's word.
+Done when the results home is updated, if one exists, and the comment is drafted or posted on the developer's word.
 
 Reply: the gate list with each verdict, the checks built, each claim's result with the commit it ran on, every rerun, the PR comment (or its link), and the shared resources the runs used.

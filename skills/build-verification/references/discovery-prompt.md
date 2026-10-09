@@ -18,5 +18,6 @@ For every answer, cite `path:line`. If the repo does not answer a question, writ
 8. **Shared I/O.** The modules that already own database and external API access, which new tools should reuse instead of opening their own connections.
 9. **Real side effects.** Anything a run would do outside this machine: send email or messages, charge money, create records in a shared sandbox, spend a quota.
 10. **Features.** The top five user-facing features, from routes, commands, menus, or docs, each with its entry point.
+11. **Verification workflow.** Where the repo keeps acceptance or launch requirements, their mapping to checks, current results, known failures, and evidence. Name the owner of each and how to tell when a source changed. Record any workflow the user has declared.
 
-Return the ten answers in order, then a short list of anything that looked broken (a start command that references a missing file, a stale README step).
+Return the eleven answers in order, then a short list of anything that looked broken (a start command that references a missing file, a stale README step).

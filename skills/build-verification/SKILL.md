@@ -28,17 +28,21 @@ Done when you know which branch you are on.
 
 Spawn a read-only subagent on a mid-tier model with the prompt in `references/discovery-prompt.md`. Spot-check two of its citations. Ask the user only what the repo could not answer, one question at a time with your recommendation. Always confirm with the user anything that needs a human to start the app and anything with a real side effect. Before calling a step human-only, read its script: it needs a human only when it prompts, needs their login or credentials, or has a side effect they have not approved.
 
-Done when each of the ten discovery questions has a cited answer or the user's answer.
+Before editing, show the developer a short setup note: the requirements source and coverage map, where current results and evidence will go, and which default files you will create. Use the user's declared workflow first, then the repo's existing homes, then the kit defaults. When two plausible choices would change the team's workflow, ask one question with a recommendation and wait for the answer. Otherwise continue with the stated choices.
+
+Done when each of the eleven discovery questions has a cited answer or the user's answer, and the setup note has been shown.
 
 ## 3. Write the skeleton
 
 1. Pick the skills directory the repo already uses; if none, the one the current agent loads. Name the kit `verify-<app>` after the app.
 2. Copy `references/rules.md` to `verify-<app>/rules.md`. Fill its `<...>` slots and delete sections for pieces the kit does not have yet.
 3. Write `verify-<app>/SKILL.md` from `references/verify-skill-template.md`.
-4. Write `features/README.md` from the index in `references/feature-map.md`, with an empty Features list.
+4. Write `features/README.md` from the index in `references/feature-map.md`, with an empty Features list. Link the repo's current results home.
 5. Copy `scripts/check.py` to `verify-<app>/scripts/check.py`.
-6. Build the doctor, following `references/pieces.md`.
-7. Add the evidence directory to `.gitignore`. This is the one existing file the skeleton may edit without asking.
+6. If the repo has no current results home, write `status.md` from `references/status.md` and link it from the feature index. Record the chosen location in `rules.md`.
+7. If discovery found a requirements source, use its existing coverage map. If none exists, default to `features/requirements.md` from `references/feature-map.md`, with uncovered clauses marked `No check yet`. Follow a different mapping workflow when the user names one.
+8. Build the doctor, following `references/pieces.md`.
+9. Add the evidence directory to `.gitignore`. This is the one existing file the skeleton may edit without asking.
 
 Done when `grep -rn '<[a-z]' verify-<app>` finds no unfilled slot.
 
@@ -62,18 +66,22 @@ Done when the list of pieces is written in your reply before any file is created
 
 Follow `references/pieces.md` for each kind and the kit's `rules.md` for its contract. Add or update the feature file line for every sub-feature a piece serves.
 
+When the kit has a requirements map, update each clause whose coverage the new piece changes. Keep the requirement text in its source, the behavior in feature files, and run results in the chosen results home.
+
 Done when every listed piece exists and its feature file line names it.
 
 ## 7. Prove each piece
 
 Run each piece's proof from `references/pieces.md` against the real app and show the output. A check is proven only after it fails on a planned break in a scratch worktree. Then run `check.py`.
 
+Record the tested code, pass or failure, evidence, and anything still unverified in the chosen results home. Attribute a passing check to the version tested until it passes on another version.
+
 Done when a `Planned break:` or `Planned fix:` line went to the user before each worktree was created, every piece has shown its proof, every check line says break-tested or why not, and `check.py` exits 0.
 
 ## Guardrails
 
 - Change product code only in a scratch worktree for a planned break, and remove the worktree after.
-- Add new files freely, but edit an existing file outside the kit (a Makefile, package manifest, config, or CI file) only after the user agrees to that exact edit.
+- Add new files freely. Edit an existing file outside the kit only when the user named it as part of this workflow or agreed to that exact edit.
 - Drive and stop only instances this run started, or ones the user named. Stop processes by the PID you started, never by name.
 - Run an action with a real or shared side effect only after the user's OK in this session.
 - Add levels of proof, extra skills, or workflow rules only when the user asks for them.

@@ -4,7 +4,8 @@ description: >-
   Audit a repo's verification kit against its requirements, the code, and the
   running app: map every requirement clause to a check, check the feature map's
   format, read each feature's source in parallel, drive every feature live,
-  re-run planned breaks for changed checks, and fix only the kit's own files.
+  re-run planned breaks for changed checks, and fix the kit and its chosen
+  coverage and results homes.
   Use for "audit the verification kit", "is the feature map current", "does
   every requirement have a check". Use build-verification to add to a kit.
 disable-model-invocation: true
@@ -26,7 +27,7 @@ End with exactly one:
 
 Look for `verify-*/rules.md` in the repo's skills directories. Several: ask which. None: stop and point the user at the verification skill.
 
-Done when you have the kit path and have read its `SKILL.md`, `rules.md`, and `features/README.md`.
+Done when you have the kit path and have read its `SKILL.md`, `rules.md`, and `features/README.md`. Read the chosen results home if the kit names one; otherwise find the repo's existing results, or the kit's `status.md` if present.
 
 ## 2. Run the mechanical check
 
@@ -38,23 +39,25 @@ Done when `check.py` exits 0 and you have a list of stale sub-features.
 
 ## 3. Map the requirements
 
-Skip this step when the kit has no `features/requirements.md`, and say so in the reply. Its format is under "Requirements coverage" in the feature map reference of the build-verification skill. A green run proves only the claims someone listed; this step finds requirements that never became a sub-feature.
+Read the requirements source and coverage map named in the kit's `rules.md`. For an older kit without those pointers, find the repo's existing source and map, including `features/requirements.md`. Skip this step when there is no requirements source, and say so in the reply. `features/requirements.md` is the default format, under "Requirements coverage" in build-verification's feature map reference. A green run proves only the claims someone listed; this step finds requirements that never became a sub-feature.
 
-Read the source the file names and note when it was last updated. If neither the source nor `features/` changed since the file's checked date, skip to step 4 and carry the open items into the reply.
+Note when the source last changed. If the map records a checked version or date and neither the source nor `features/` changed since then, skip to step 4 and carry the open items into the reply.
+
+Treat the source as the owner of requirements, feature files as the owner of behavior and proof routes, and the chosen results home as the owner of current results. Do not turn a pass on one version or a known failure into a claim about intended behavior.
 
 1. Break each requirement into clauses: each state, direction, count, or ordering it names. "Messages arrive in order exactly once" is three clauses. A requirement too vague to break down gets a proposed edit asking its owner for the clauses. Add requirements the design docs state that the source does not.
-2. Give each clause the first outcome that fits:
+2. Give each clause the first outcome that fits, using the chosen map's format. The labels below are the default map's wording:
    - A sub-feature proves it: `ids: <IDs>`.
    - The team knows the requirement and the source lacks it: `not in source`, and propose adding it.
    - The source contradicts the code, a design doc, or the agreed scope: add no check; record it under "Conflicts with the source", naming both sides, as an edit its owner can paste.
    - The expected behavior is undecided: `blocked on decision: <the decision>`.
    - None of these: add the sub-feature to its feature file with `No check yet.` and set `No check yet`.
 3. Go the other way: a sub-feature no clause, design doc, or scope needs gets a proposed removal or `out of scope: <reason>`.
-4. Update the checked date.
+4. Update the map's checked version or date when it has one. Follow the user's workflow for a map outside the kit; propose edits when another owner controls it.
 
 Hand fact lookups (whether a change is merged, where the code decides a behavior) to subagents on a mid-tier model, each answer carrying its `path:line` or URL, and check that evidence. Split clauses and choose outcomes yourself; a summary that drops a clause is the failure this step exists to catch. Never edit the requirements source; its owner decides.
 
-Done when every clause and every sub-feature has exactly one outcome, and `check.py` exits 0.
+Done when every clause and every sub-feature has exactly one outcome, and `check.py` exits 0 when the kit's map changed.
 
 ## 4. Read the source
 
@@ -72,6 +75,7 @@ Done when every cited drift is confirmed or dismissed, with the reason.
 
 Follow the kit's own `SKILL.md` to check the instance and drive. Run every sub-feature's proof command at least once, plus the live recipe for any sub-feature marked "No check yet" or "Unreachable". Throughout:
 
+- Record the version each running component uses before interpreting any result. A stale or unknown component makes its dependent results not verified.
 - Run the doctor before the first drive, after any failed drive, and reset or relaunch when the app is wedged in a state the doctor cannot see.
 - Confirm evidence files still exist after every cleanup.
 - Clean up whatever a failed drive left behind before the next one.
@@ -89,13 +93,13 @@ Sort every finding:
 - **Kit gap:** working behavior the kit cannot drive or read. Fix the tool, following `rules.md`, and re-drive it live. A flake seen twice is a kit gap until its cause is found: add the diagnostic that names the cause before retrying.
 - **Product bug:** the app is broken. Record it with the failing step and evidence. Never edit product code or soften the map to hide it.
 
-Run `check.py` again after the fixes.
+Update the chosen results home, when one exists: record the tested version and evidence, keep known failures and misleading passes current, and list checks that could not run. If the repo has no results home, include those facts in the reply. Remove a known failure only after the relevant check passes on the version where it was tracked. Run `check.py` again after the fixes.
 
 Done when every finding has a category and every kit fix has been driven live.
 
 ## Guardrails
 
-- Edit only files inside the kit and the tools it owns.
+- Edit only files inside the kit and the tools it owns, plus the mapping and results homes the user chose for this workflow. Propose changes to sources owned by someone else.
 - Drive and stop only instances this run started, or ones the user named.
 - Run an action with a real or shared side effect only after the user's OK in this session.
 - Ask before committing or opening a pull request.

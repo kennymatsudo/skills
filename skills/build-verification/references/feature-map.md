@@ -8,6 +8,7 @@ The map lives in `features/` inside the kit: one `README.md` index and one file 
 # <App> feature map
 
 Open the file for the feature you changed. Follow `../rules.md` for every proof.
+Read [current results](../status.md) for known failures, misleading passes, untested cases, and the latest results.
 
 ## Baseline
 
@@ -20,7 +21,7 @@ Open the file for the feature you changed. Follow `../rules.md` for every proof.
 - [Checkout](checkout.md): pay, saved cards, failed payment retry.
 ```
 
-Group the list under H3 area headings once it passes about ten entries. A journey that crosses several features gets its own file that links to the per-feature files rather than repeating them.
+Replace the current-results link with the repo's existing results home when it has one. Group the list under H3 area headings once it passes about ten entries. A journey that crosses several features gets its own file that links to the per-feature files rather than repeating them.
 
 ## Feature file: `features/<slug>.md`
 
@@ -58,11 +59,13 @@ Rules the script enforces:
 - A command line says `Break-tested <date>: <what was broken>.` or `Not break-tested: <reason>.`
 - Every path or command named in backticks under "How to prove it" exists in the repo.
 
+Keep the feature file about intended behavior and stable ways to prove it. A current failure, a version-specific pass, or a temporary harness limitation belongs in the chosen results home.
+
 An optional `## Request flow` section may sit before "How to prove it" when the code path is not obvious. Keep the rest of the file about what the user does and sees.
 
 ## Requirements coverage: `features/requirements.md`
 
-Optional. Add it when the project has a requirements source, such as a launch checklist, spec, or design docs, so maintain-verification can find requirements that never became a sub-feature. It holds only the mapping; the requirements live in their source and the behaviors in the feature files.
+This is the default when the project has a requirements source but no existing mapping. Use the project's mapping when it has one. The map holds only the links; requirements live in their source and behaviors in the feature files.
 
 ```markdown
 # Requirements coverage
