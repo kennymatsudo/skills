@@ -29,17 +29,7 @@ My personal agent skills, in the [Agent Skills](https://agentskills.io) format. 
 
 ### Verification
 
-Skills for proving a change works on the running app, not just in tests.
-
-The verification kit has a default layout but follows a project's existing workflow. It keeps requirements, feature claims, and current results distinct, and ties every result to the version and behavior actually tested.
-
-| Skill | What it does |
-| --- | --- |
-| [build-verification](skills/build-verification/SKILL.md) | Sets up and grows a repo's verification kit so an agent can prove a change works on the running app. |
-| [maintain-verification](skills/maintain-verification/SKILL.md) | Audits a repo's verification kit against its requirements, the code, and the running app, and fixes the kit's own files. |
-| [explore-bugs](skills/explore-bugs/SKILL.md) | Runs one round of exploratory testing to find bugs nobody wrote down, confirms each break, turns it into a failing check, and records the round in a ledger. |
-| [review-against-harness](skills/review-against-harness/SKILL.md) | Tests a teammate's PR against the end-to-end harness: decides which of its claims belong there, builds those checks, runs them on the PR's build, sorts the failures, and drafts a PR comment. |
-| [audit-harness-checks](skills/audit-harness-checks/SKILL.md) | Sweeps the harness for checks and tests that would still pass if what they guard broke, verifies each finding independently, and fixes the clear-cut ones on a branch. |
+The verification skills (build-verification, maintain-verification, explore-bugs, review-against-harness, audit-harness-checks) live in their own repo, [verification-framework](https://github.com/kennymatsudo/verification-framework).
 
 ## Install
 
