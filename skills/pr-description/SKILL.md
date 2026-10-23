@@ -65,7 +65,7 @@ Done when every changed file has a bucket, the motivation is sourced or asked fo
 
 ## 4. Write
 
-Write for a reviewer who hasn't opened the code yet: what users, operators, and callers will notice. Code identifiers, SQL, type-checker terms, exception types, and metric names stay out unless the reviewer must act on one, such as a new setting to configure.
+Write for a reviewer who hasn't opened the code yet: what users, operators, and callers will notice. Code identifiers, SQL, type-checker terms, exception types, and metric names stay out unless the reviewer must act on one, such as a new setting to configure. Load the writing-style skill for its sentence rules; the layout rules here win where they differ.
 
 - **Lead.** One or two sentences: the problem, then what the change sets out to achieve. No windup.
 - **Bullets.** One per headline change, plus unrelated ones, three to six. Each is one line saying what changed in behavior, never file by file. Leave out supporting changes unless they are the point of the PR.
