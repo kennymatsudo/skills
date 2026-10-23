@@ -1,10 +1,8 @@
 # kskills
 
-My personal agent skills, in the [Agent Skills](https://agentskills.io) format. They work with Claude Code, Codex, Cursor, and any other agent the `skills` CLI supports.
+My personal agent skills for the recurring work of a coding session: committing, reviewing a PR, explaining a code path, writing docs in a house style. They are in the [Agent Skills](https://agentskills.io) format and work with Claude Code, Codex, Cursor, and any other agent the `skills` CLI supports.
 
 ## Skills
-
-### General
 
 | Skill | What it does |
 | --- | --- |
@@ -25,10 +23,8 @@ My personal agent skills, in the [Agent Skills](https://agentskills.io) format. 
 | [update-agent-instructions](skills/update-agent-instructions/SKILL.md) | Proposes edits to AGENTS.md, CLAUDE.md, and skills from lessons in the current session. |
 | [walkthrough](skills/walkthrough/SKILL.md) | Walks you through a teammate's PR one layer at a time: why it exists, what changed before and after, and what order to read it in, with every claim cited. |
 | [why](skills/why/SKILL.md) | Traces why code has its current shape through git, PRs, tickets, and docs, and says whether the reason still holds. |
-| [writing-style](skills/writing-style/SKILL.md) | The house style for docs, guides, PR text, and reports: point first, one name per thing, facts with their actor instead of rhetoric, and the moves that mark prose as model-written. Unslop and pr-description load it. |
+| [writing-style](skills/writing-style/SKILL.md) | The house style for docs, guides, PR text, and reports: point first, one name per thing, every claim with its actor, and the moves that mark prose as model-written. Unslop and pr-description load it. |
 | [wut](skills/wut/SKILL.md) | Restates the agent's last reply, or one part of it, as the bottom line plus a few plain bullets, with jargon swapped out. |
-
-### Verification
 
 The verification skills (build-verification, maintain-verification, explore-bugs, review-against-harness, audit-harness-checks) live in their own repo, [verification-framework](https://github.com/kennymatsudo/verification-framework).
 
@@ -78,11 +74,11 @@ Instructions...
 
 1. Create `skills/<skill-name>/SKILL.md`, or run `npx skills init skills/<skill-name>`.
 2. Check it is found: `npx skills add . --list`.
-3. Add a row to the matching table under [Skills](#skills).
+3. Add a row to the table under [Skills](#skills).
 4. Commit and push. Users get it with `npx skills update` or `/plugin marketplace update`.
 
 The Claude Code plugin picks up every folder under `skills/` automatically, so the manifests in `.claude-plugin/` need no edits when you add a skill.
 
-## Acknowledgments
+## Where these skills come from
 
 Many of these skills draw on ideas from [Matt Pocock's skills](https://github.com/mattpocock/skills), [pstack](https://github.com/cursor/plugins/tree/main/pstack), and Cursor's [cursor-team-kit](https://github.com/cursor/plugins/tree/main/cursor-team-kit). A skill that adapts their text carries the original license in its `THIRD_PARTY_LICENSE.md`.
