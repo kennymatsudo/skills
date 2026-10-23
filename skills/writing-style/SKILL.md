@@ -53,7 +53,7 @@ Done when no heading could sit unchanged in an unrelated doc.
 
 ## 4. Terms
 
-- **Define a term where the reader first meets it,** in a few words, even if a glossary has it.
+- **Define a term where the reader first meets it,** in a few words, even if a glossary has it. Define with "is", not "refers to": a word refers, a thing is. Coin a name only for a thing the doc returns to.
 - **One name per thing,** the same in every doc, skill, and tool in the project. Elegant variation (cycling synonyms to avoid repeating a word) makes the reader wonder whether two names mean two things.
 - **Keep analogies out of names.** An analogy (a test bench, a notebook) can introduce and group ideas. The names are the terms the code, commands, and rules use. Never put an analogy word in a command, a file name, or a rule.
 - **Plain words over jargon.** Keep the domain terms the reader's team uses. Replace metaphor jargon (substrate, north star, flywheel, surface, wedge) with the literal word.
@@ -69,11 +69,11 @@ Most moves below belong to one register, performed plainness: plain language ove
 - **Dropped objects.** A verb that leans on an object several clauses back ("prove it, and tell you when they can't") makes the reader reconstruct it. Restate the object: "when they can't prove it".
 - **Slogans.** Antithesis ("prove X, and say when you can't"), aphorisms, fragments for effect, and tidy codas. Write the lumpier literal sentence. A slogan standing in for a rule becomes the rule with its object attached: "never a pass" becomes "a check that never failed on a planned break can't mark a behavior Verified".
 - **Personified tools.** Tools don't say, want, know, or believe. They print, report, return, and tell you. The same goes for figurative verbs ("the cache remembers").
-- **Puffery.** "pivotal", "a testament to", "plays a crucial role", trailing "-ing" clauses that add significance ("..., highlighting the need for..."). Say what happened or cut it.
-- **False contrast.** "Not just X, but Y", "It's not X, it's Y", "rather than simply". State Y. Keep the contrast only when the reader would otherwise believe X.
-- **Missing agent.** "The decision emerged", "queries are validated". Name who or what acts.
+- **Puffery.** "pivotal", "a testament to", "plays a crucial role", intensifiers ("genuinely", "fundamentally", "remarkably", "deeply"), trailing "-ing" clauses that add significance ("..., highlighting the need for..."). Say what happened or cut it.
+- **False contrast.** "Not just X, but Y", "It's not X, it's Y", and bare corrections ("Y rather than X", "should not be confused with", "not because X"). State Y. Keep the contrast only when the reader would otherwise believe X.
+- **Missing agent.** "The decision emerged", "queries are validated", and claims with no named source ("experts say", "studies show", "widely used"). Name who or what acts, or who says so; where no one does, cut the claim.
 - **Portable sentences.** A sentence that could sit unchanged in another project's docs ("keeps the database close at hand") says nothing about this one. Replace it with the mechanism or a number, or cut it.
-- **Throat-clearing and hedging.** "This can help you...", "I hope this helps", "It is important to note that", "In order to" (use "to"), "could potentially" (use "may"). Name real uncertainty once.
+- **Throat-clearing and hedging.** "This can help you...", "I hope this helps", "It is important to note that", "In order to" (use "to"), "could potentially" (use "may"), and a question or teaser that sets up the answer ("Why does this matter?", "Here's the catch:"). Give the answer. Name real uncertainty once.
 - **Dressed-up verbs.** "serves as" is "is"; "utilize" and "leverage" are "use"; "facilitate" is "help".
 - **Telegraphese.** Arrows, dropped articles, and private abbreviations. Write whole sentences.
 - **Tricolons and false ranges.** Groups of three that aren't naturally three; "from X to Y" where X and Y aren't the ends of a scale.
@@ -82,8 +82,8 @@ Done when no sentence matches a move above.
 
 ## 6. Punctuation and emphasis
 
-- No em dashes; use a comma or a period. Use a colon only before a list or example.
-- Bold only a lead-in or the one decisive detail, never whole sentences or every term.
+- No em dashes. Where one joined two thoughts, write the joining word ("because", "which", "so") or split the sentence; a short aside goes in parentheses. Use a colon only before a list or example.
+- Bold only the one decisive detail, or the lead-in of each item in a reference list the reader scans by key. A short list of claims with a bolded label and colon on every item reads as a key-takeaways box; write those as sentences. Never bold whole sentences or every term.
 - Straight quotes. No decorative emoji.
 
 Done when the draft has no em dash, curly quote, or bolded sentence.
@@ -91,5 +91,6 @@ Done when the draft has no em dash, curly quote, or bolded sentence.
 ## Guardrails
 
 - Never invent a fact, number, reason, or example to satisfy a rule. Where you lack the specific, cut the vague sentence or ask.
+- Never add opinion, first person, jokes, or asides to sound human. Plain formal prose is not a tell, and a performed personality is one.
 
 **Reply:** the written text. If a rule couldn't be met for lack of a fact, name the gap in one line.
