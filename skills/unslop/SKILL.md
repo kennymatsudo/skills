@@ -16,7 +16,7 @@ description: >-
 
 You own a version of the target that a person would choose to read: the same facts for prose, the same behavior for code.
 
-Slop is a set of moves, not a list of words. Each model generation swaps old tells for new ones, so the examples in the references show a move; fix every instance of the move, worded any way.
+Slop is a set of moves, not a list of words. Each model generation swaps old tells for new ones, so the examples in writing-style and the references show a move; fix every instance of the move, worded any way.
 
 ## 1. Scope and route
 
@@ -24,7 +24,7 @@ The target is what the user named: a file, a directory, pasted text, or the last
 
 Route each file:
 
-- **Prose** (markdown, text, PR or commit text, pasted writing): read `references/prose.md`.
+- **Prose** (markdown, text, PR or commit text, pasted writing): read `references/prose.md`, which loads the **writing-style** skill.
 - **Code**: read `references/code.md`.
 
 A diff with both gets both passes. When the target spans more than five documents, list them and ask the user which to rewrite first.
