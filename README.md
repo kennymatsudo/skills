@@ -21,7 +21,7 @@ My personal agent skills for the recurring work of a coding session: committing,
 | [trim](skills/trim/SKILL.md) | Cuts redundancy from any document without changing what it says. |
 | [unslop](skills/unslop/SKILL.md) | Cleans AI slop out of prose or a code diff so a person wants to read it. |
 | [update-agent-instructions](skills/update-agent-instructions/SKILL.md) | Proposes edits to AGENTS.md, CLAUDE.md, and skills from lessons in the current session. |
-| [walkthrough](skills/walkthrough/SKILL.md) | Walks you through a teammate's PR one layer at a time: why it exists, what changed before and after, and what order to read it in, with every claim cited. |
+| [walkthrough](skills/walkthrough/SKILL.md) | Walks you through a teammate's PR: why it exists, what order to read it in, and each part before and after, with every claim cited. Code paths on request. |
 | [why](skills/why/SKILL.md) | Traces why code has its current shape through git, PRs, tickets, and docs, and says whether the reason still holds. |
 | [writing-style](skills/writing-style/SKILL.md) | The house style for docs, guides, PR text, and reports: point first, one name per thing, every claim with its actor, and the moves that mark prose as model-written. Unslop and pr-description load it. |
 | [wut](skills/wut/SKILL.md) | Restates the agent's last reply, or one part of it, as the bottom line plus a few plain bullets, with jargon swapped out. |

@@ -6,7 +6,6 @@ Usage: check_citations.py <repo-root> <base-ref> <head-ref> <draft-file | ->
 A citation is `path:LINE` or `path:START-END`, checked against the head ref.
 Prefix it with `before:` to check it against the base ref instead, for code the
 change removed or rewrote. Exits 1 if any citation is broken or the draft has none.
-On success, also prints the draft's word count with citations left out.
 """
 
 import re
@@ -25,11 +24,6 @@ def git(repo: str, *args: str) -> str | None:
 
 def find_citations(draft: str) -> list[tuple[str, str, str, str]]:
     return CITATION.findall(URL.sub("", draft))
-
-
-def prose_words(draft: str) -> int:
-    # Citations leave wrappers like "(``)" behind; count only tokens with a letter or digit.
-    return sum(1 for token in CITATION.sub("", URL.sub("", draft)).split() if re.search(r"\w", token))
 
 
 def resolve(path_text: str, files: list[str]) -> str | None:
@@ -81,7 +75,7 @@ def main() -> int:
         print(failure)
     if failures:
         return 1
-    print(f"OK: {len(find_citations(draft))} citations, {prose_words(draft)} words without citations")
+    print(f"OK: {len(find_citations(draft))} citations")
     return 0
 
 
