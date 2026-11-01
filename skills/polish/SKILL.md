@@ -44,11 +44,11 @@ Find each skill's `SKILL.md` in this skill's parent directory first, resolving s
 
 Where a step ends by asking which finding to act on, polish answers for the user as below. Questions about intended behavior, such as review-tests asking for a contract source, still go to the user. Keep only each step's counts, flags, and reported bugs; the final report needs nothing else.
 
-Run `<this skill's directory>/scripts/checkpoint.sh save` before step 1 and after every step, and record each id. It snapshots the working tree, including untracked files, without touching the index.
+`<this skill's directory>/scripts/checkpoint.sh save` snapshots the working tree, including untracked files, without touching the index, and prints an id; `checkpoint.sh restore <id>` puts it back. Save once before anything changes, and once before each refactor in step 2.
 
 ## 1. Set up
 
-Create a run directory with `mktemp -d` outside the repo. Run the repo's typecheck, lint in check-only mode, and the tests for the files in scope, and record what fails: that is the baseline for step 8. Save the start checkpoint and tell the user its id.
+Run the repo's typecheck, lint in check-only mode, and the tests for the files in scope, and record what fails: that is the baseline for step 8. Save the start checkpoint and tell the user its id.
 
 Done when you have the scope's file list, the baseline, the start checkpoint id, and each step's skill found or marked not installed. If the scope is empty, say so and stop.
 
@@ -95,7 +95,7 @@ Done when each doc file in scope is trimmed and unslopped, or the step is marked
 
 ## 8. Check
 
-Rerun the step 1 checks. For each new failure, find the first step whose checkpoint shows it by diffing checkpoints with `git diff <before-id> <after-id>`, and report it against that step. Don't fix it here.
+Rerun the step 1 checks. For each new failure, name the step whose edits broke it, from the failing file and the kind of change (a refactor, a rename, a cut test). Don't fix it here.
 
 Done when every check passes or fails only where the baseline failed, or each new failure is tied to a step.
 
@@ -105,5 +105,5 @@ Reply:
 - Design: each finding applied, reverted (with why), superseded, or unapplied, by title. Offer a handoff prompt for any unapplied one.
 - Every bug, flag, and hard-to-follow spot the steps reported, with `path:line`.
 - The check results against the baseline.
-- The start checkpoint id, with `checkpoint.sh restore <id>` to undo the whole run and `git diff <id-before> <id-after>` to see one step's changes.
+- The start checkpoint id, with `checkpoint.sh restore <id>` to undo the whole run.
 - Next: review the diff, then commit.
