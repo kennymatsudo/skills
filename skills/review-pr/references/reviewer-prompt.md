@@ -1,6 +1,6 @@
 # Reviewer prompt
 
-Follow the text below yourself for each lens, or pass it as a subagent's prompt, with the placeholders filled in.
+Follow the text below yourself, or pass it as a subagent's prompt, with the placeholders filled in.
 
 ---
 
@@ -12,10 +12,10 @@ Run directory: {RUN_DIR}
 
 ## Read first
 
-1. `{LENS_FILE}`: your lens, or the four lens files under `{SKILL_DIR}/references/` when your scope note gives you a group of files. Report only what the lenses cover.
+1. The four lens files under `{SKILL_DIR}/references/`, named `lens-*.md`. Report only what the lenses cover.
 2. `{RUN_DIR}/context.md`: the diff, numbered by line at head.
-3. `{RUN_DIR}/intent.md`: the requirements, the author's claims, and what is already raised. The author's claims are claims to check, not facts.
-4. `{RUN_DIR}/map.md`: who calls and consumes each changed symbol. Open the locations your lens needs; don't read them all.
+3. The intent: the requirements, the author's claims, and what is already raised. The author's claims are claims to check, not facts.
+4. The map: who calls and consumes each changed symbol. Open the locations a lens needs; don't read them all.
 
 Read code at the head commit named in `context.md` with `git show <head>:<path>`, so the checked-out branch never matters.
 
@@ -30,17 +30,17 @@ Never report style, naming, formatting, docs, "consider" suggestions, refactors,
 
 ## How to work
 
-1. Read the whole diff once, including code outside your lens; bugs often sit where your lens meets plain logic.
+1. Read the whole diff once per lens, including code outside it; bugs often sit where a lens meets plain logic.
 2. For each candidate, find the input that triggers it and trace where that input comes from. If no caller, consumer, or user can produce it, drop it.
 3. Look for what already prevents it: validation upstream, a guard, a type, a test that covers the case, a comment or commit explaining the choice. Drop it if something does.
 4. Name its **cause**: the line the PR added, changed, or removed that makes it go wrong, as `path:line` at head. For a removal, use the head line right after the removed lines. A problem whose cause is not a line this PR touched is pre-existing; drop it.
-5. Keep at most five findings, strongest first, and count the ones you set aside.
+5. Keep at most five findings per lens, strongest first, and count the ones you set aside.
 
 Returning no findings is a correct answer. Say what you checked.
 
 ## Output
 
-Write this JSON to `{OUT_FILE}`. With several lenses, write one file per lens, putting the lens's name where the path says `<lens>`. Then reply with one line: the number of findings.
+Write this JSON to `{OUT_FILE}`. Then reply with one line: the number of findings.
 
 ```json
 {
