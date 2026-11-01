@@ -20,15 +20,15 @@ If the user asks for an audit or dry run, stop after step 4 and report.
 
 ## 1. Collect the diff
 
-By default, cover the branch: everything that differs from its merge base with the default branch, whether committed, staged, unstaged, or untracked. Find the default branch with `git symbolic-ref --short refs/remotes/origin/HEAD`, else `origin/main`, else `origin/master`. From the repo root, run `python3 <skill-dir>/scripts/test_diff.py --base <default>`, with this skill's absolute directory. Narrow it when the user asks:
+By default, cover the branch: everything that differs from its merge base with the default branch, whether committed, staged, unstaged, or untracked. Find the default branch with `git symbolic-ref --short refs/remotes/origin/HEAD`, else `origin/main`, else `origin/master`, and take `git diff --name-status $(git merge-base HEAD <default>)` plus untracked files from `git status --porcelain`. Narrow it when the user asks:
 
-- **Uncommitted:** pass `--base HEAD`.
-- **Staged:** pass `--base HEAD --staged`.
+- **Uncommitted:** diff against `HEAD`.
+- **Staged:** `git diff --staged` only.
 - **A path:** keep only the files under that path.
 
-Tell the user the scope in one line before going further, such as "Scope: branch `foo` vs `origin/main`, 12 files".
+Split the files into tests and production code by the repo's own layout, and tell the user the scope in one line before going further, such as "Scope: branch `foo` vs `origin/main`, 12 files".
 
-The script lists changed test and production files, including uncommitted and untracked ones, and flags removed or changed assertion lines, new skip or focus markers, and deleted tests. It matches text patterns: treat each flag as a lead, read by hand any file it lists with no assertion found, and don't read a clean result as proof. Read the test changes with the test-only diff command it prints, plus the untracked test files; leave the production diff for step 3.
+Read the diff of the test files only, with `-U0` for modified ones and whole files for new ones, and flag three leads: an assertion line removed or changed, a skip, focus, or expected-failure marker added, and a test deleted. Leave the production diff for step 3.
 
 Done when every added or modified test case is listed with `file:line` and new or pre-existing, and every flag is attached to a test or noted as unrelated. For a modified pre-existing test, judge only its changed lines.
 
