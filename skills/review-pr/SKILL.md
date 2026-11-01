@@ -15,7 +15,7 @@ description: >-
 
 You own a short list of defects this PR introduces, each proven, that the author would thank you for. Two findings that hold beat ten the author has to argue with. "No findings" is a valid result.
 
-Run every step in order and write every file, even when the PR looks simple. A single careful read is what the user had without this skill; the lenses, the caller map, and the separate checkers are what catch the bugs a single read misses. If a step can't run, say which and why in the report.
+Run every step in order, even when the PR looks simple. A single careful read is what the user had without this skill; the lenses, the caller map, and the separate checkers are what catch the bugs a single read misses. If a step can't run, say which and why in the report.
 
 ## The bar
 
@@ -43,30 +43,28 @@ Done when `context.md` exists and names either the working test command or why t
 
 ## 2. Gather intent
 
-Write `<run-dir>/intent.md` with three sections:
+Note three things before reading the code:
 
 - **Requirements.** Numbered, from linked tickets: IDs in the title, branch, description, or commits, plus closing issue references. List the session's tools, including ones the harness names but loads on demand, and look each ID up with any that can search a ticket tracker. Report a tracker as unsearched only after finding no tool for it or a lookup failing, and say which. With no ticket, take the requirements from the description and say so.
 - **Author's claims.** What the description and commits say the change does, does not change, and was tested with, each phrased as a claim to check ("description says the old endpoint still works"). Leave out the author's judgments of safety or quality; they make reviewers miss bugs.
 - **Already raised.** Open review threads and failing checks, one line each, so nobody repeats them.
 
-Done when every requirement is numbered with its source, or the file says no requirements source was found.
+Done when every requirement is numbered with its source, or you have noted that no requirements source was found.
 
 ## 3. Map the blast radius
 
-Write `<run-dir>/map.md`. List every symbol the diff changes: functions, classes, endpoints, schemas and migrations, config keys, events and messages, CLI flags. For each, give:
+List every symbol the diff changes: functions, classes, endpoints, schemas and migrations, config keys, events and messages, CLI flags. For each, give:
 
 - **Upstream:** who calls it or produces its input, as `path:line` from `git grep <name> <head>`.
 - **Downstream:** who consumes what it returns, writes, or emits: callers using the result, readers of the table or event, API clients, other services. For names that cross a repo boundary (routes, topics, table names), search other repos with the session's code search tool if there is one, else mark "other repos unsearched".
-
-Paths only, no pasted code; reviewers open what they need.
 
 Done when every changed symbol has an upstream line and a downstream line, each with locations, "none found", or "unsearched".
 
 ## 4. Review
 
-Run each lens yourself, one at a time: read its file, follow `references/reviewer-prompt.md` as if it were your prompt, and write `<run-dir>/review-<lens>.json` before starting the next. One reviewer holding the whole diff and map finds as much as parallel reviewers, at a fraction of the cost.
+Follow `references/reviewer-prompt.md` as if it were your prompt, with the intent and map from steps 2 and 3 in hand, and read the diff once through each lens below. Collect every finding in one `<run-dir>/findings.json`. One reviewer holding the whole diff and map finds as much as parallel reviewers, at a fraction of the cost.
 
-When `context.md` says the diff is over the limit, split the changed files into groups that call each other, and spawn one subagent per group on a mid-tier model with the reviewer prompt, running all four lenses on its group: fill in the skill's directory for `{SKILL_DIR}`, name the group's files in the scope note, and set the output path to `<run-dir>/group-<n>-<lens>.json`. Merge each lens's group files into its `review-<lens>.json`.
+When `context.md` says the diff is over the limit, split the changed files into groups that call each other, and spawn one subagent per group on a mid-tier model with the reviewer prompt: paste the intent and map into the prompt, fill in the skill's directory for `{SKILL_DIR}`, name the group's files in the scope note, and set the output path to `<run-dir>/findings-<n>.json`.
 
 | Lens | File |
 |---|---|
@@ -75,7 +73,7 @@ When `context.md` says the diff is over the limit, split the changed files into 
 | Gaps against the requirements | `references/lens-intent.md` |
 | Security and data | `references/lens-security.md` |
 
-Then run `review.py collect <run-dir>`. It drops findings whose cause is not a changed line, groups findings that share a cause, and writes one `batch-<group>.md` per group. If it reports a missing or malformed review file, rerun that lens.
+Then run `review.py collect <run-dir>`. It drops findings whose cause is not a changed line, groups findings that share a cause, and writes one `batch-<group>.md` per group. If it reports a malformed findings file, fix that file.
 
 Done when `collect` prints its counts and batch files.
 

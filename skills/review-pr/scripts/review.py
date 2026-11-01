@@ -3,7 +3,7 @@
 
   review.py context  RUN_DIR --base REF --head REF
                                     run in the repo; writes context.md and changed.json
-  review.py collect  RUN_DIR        reads review-*.json, drops findings whose cause is not a
+  review.py collect  RUN_DIR        reads findings*.json, drops findings whose cause is not a
                                     changed line, groups duplicates, writes batch-*.md
   review.py status   RUN_DIR        reads check-*.json, prints each group's answer
   review.py findings RUN_DIR        prints kept groups, then dropped and unresolved ones
@@ -12,7 +12,7 @@ The diff carries head line numbers because models anchor findings better on
 numbered lines. Every finding must name a cause on a line the PR added or changed, so
 pre-existing problems drop out mechanically instead of by judgment.
 Batches hold only the claim, scenario, cause, and evidence, so a checker judges
-the code and never sees which reviewer raised it or how severe it was called.
+the code and never sees how severe the reviewer called it.
 """
 
 import argparse
@@ -22,7 +22,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-LENSES = ["diff", "contracts", "intent", "security"]
 SEVERITIES = {"high", "medium"}
 LABELS = {"Proven", "Holds", "Refuted", "Unresolved", "Below the bar"}
 KEPT = {"Proven", "Holds"}
@@ -112,18 +111,17 @@ def on_changed_line(cause, changed):
 
 def load_findings(run_dir):
     findings, errors = [], []
-    for lens in LENSES:
-        path = run_dir / f"review-{lens}.json"
-        if not path.exists():
-            errors.append(f"{path.name}: missing")
-            continue
+    paths = sorted(run_dir.glob("findings*.json"))
+    if not paths:
+        errors.append("findings.json: missing")
+    for path in paths:
         try:
             data = json.loads(path.read_text())
         except json.JSONDecodeError as e:
             errors.append(f"{path.name}: invalid JSON ({e})")
             continue
         for i, f in enumerate(data.get("findings", []), 1):
-            fid = f"{lens}-{i}"
+            fid = f"{path.stem}-{i}"
             for field in ("claim", "scenario", "cause", "proof"):
                 if not str(f.get(field, "")).strip():
                     errors.append(f"{fid}: no {field}")
@@ -134,7 +132,7 @@ def load_findings(run_dir):
                 errors.append(f"{fid}: needs evidence with a location and a quote")
             if f.get("severity") not in SEVERITIES:
                 errors.append(f"{fid}: severity must be one of {sorted(SEVERITIES)}")
-            findings.append({"id": fid, "lens": lens, **f, "evidence": evidence})
+            findings.append({"id": fid, **f, "evidence": evidence})
     return findings, errors
 
 
@@ -152,13 +150,8 @@ def group(findings):
     return {f"G{n}": g for n, g in enumerate(groups, 1)}
 
 
-def missing_steps(run_dir):
-    return [f"{name}: missing; write it before reviewing" for name in ("intent.md", "map.md") if not (run_dir / name).exists()]
-
-
 def collect(run_dir):
     findings, errors = load_findings(run_dir)
-    errors = missing_steps(run_dir) + errors
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
