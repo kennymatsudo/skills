@@ -10,6 +10,7 @@ My personal agent skills for the recurring work of a coding session: committing,
 | [commit](skills/commit/SKILL.md) | Stages changes and commits with a short title and scannable body, folding follow-ups into unpushed commits. |
 | [create-skill](skills/create-skill/SKILL.md) | Creates, adapts, or edits a skill, validates it, and proves it beats a baseline in headless test runs with cost measured. |
 | [how](skills/how/SKILL.md) | Explains how a system or code path works, one zoom level at a time, with every claim cited. |
+| [map](skills/map/SKILL.md) | Maps a codebase's services and how they connect, then zooms into one service or path on request, with every box and arrow cited, each level saved locally, and a clickable diagram page to browse it. |
 | [polish](skills/polish/SKILL.md) | Polishes a finished branch in one run: applies strong design-review refactors, then reviews tests, renames, cuts code slop, cleans comments, and tidies docs, leaving it uncommitted. |
 | [pr-description](skills/pr-description/SKILL.md) | Drafts a PR title and a short body (why, then a few high-level bullets) in the repo's template, and offers checkable notes for review bots. |
 | [rename-variables](skills/rename-variables/SKILL.md) | Renames identifiers your branch adds, or under a given path, so each is honest and in the repo's vocabulary, updating every reference. |
