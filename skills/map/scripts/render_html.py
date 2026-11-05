@@ -5,11 +5,12 @@ Usage: render_html.py <repo-root> <map.json> <out.html>
 
 The page draws one level at a time, left to right, with Pele, a Mermaid
 renderer: callers on the left, and the datastores, queues, and outside systems
-they call on the right. Each box shows its name and role, so a level reads
-without clicking. Clicking a box shows its connections and issues in the side
-panel; double-clicking it, or its Open button, goes one level down. Citations
-open the cited line in VS Code. Everything but Pele and two web fonts is
-inline, so the file opens straight from disk.
+they call on the right. The drawing stays monochrome and shows each box's kind
+by its shape, so the only colour on it is the issue tag clipped to a box that
+holds bugs or risks. Clicking a box shows its connections and issues in the
+side panel; double-clicking it, or its Open button, goes one level down.
+Citations open the cited line in VS Code. Everything but Pele and one web font
+is inline, so the file opens straight from disk.
 """
 
 import json
@@ -24,142 +25,157 @@ TEMPLATE = r"""<!doctype html>
 <title>__TITLE__ map</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --canvas: #f4f5f2; --dot: #dcdfd8; --box: #ffffff; --ink: #191c1a; --soft: #5f6661; --faint: #8c938e;
-  --rule: #dfe2dc; --wire: #a9b0aa; --accent: #0f6e66; --accent-wash: #e1f0ec;
-  --data: #2f5d8a; --data-wash: #e6eef6; --async: #7a5a12; --async-wash: #f5eedd;
-  --ext: #6b6f6c; --ext-wash: #eeefec;
-  --bug: #c2361f; --bug-wash: #fbe9e5; --risk: #b26a00; --risk-wash: #fbf0dc; --gap: #5f6661; --gap-wash: #eceeea;
-  --panel: #fbfbf9; --shadow: 0 1px 2px rgba(20,30,25,.06), 0 2px 8px rgba(20,30,25,.05);
+  --sheet: #f3f4f6; --card: #ffffff; --ink: #23272d; --pencil: #5d6570; --faint: #6f7781;
+  --rule: #d6dae0; --wire: #8a929c; --line: #9aa2ab;
+  --link: #2457c5; --link-wash: #e8eefb;
+  --bug: #c9321c; --risk: #8f5a08; --gap: #5d6570;
+  --panel: #fbfbfc; --font: Archivo, system-ui, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --canvas: #121514; --dot: #1f2422; --box: #1b201e; --ink: #e6ebe8; --soft: #a0aaa5; --faint: #78827d;
-    --rule: #2a312e; --wire: #4f5a55; --accent: #5cc4b6; --accent-wash: #173230;
-    --data: #82b1de; --data-wash: #182634; --async: #d9b45f; --async-wash: #2c2414;
-    --ext: #a3a8a5; --ext-wash: #202523;
-    --bug: #f07a63; --bug-wash: #3a1d17; --risk: #f0b04a; --risk-wash: #33270f; --gap: #a0aaa5; --gap-wash: #232826;
-    --panel: #161a19; --shadow: 0 1px 2px rgba(0,0,0,.4);
+    --sheet: #1a1d21; --card: #23272c; --ink: #e7eaee; --pencil: #a7afb8; --faint: #8d959e;
+    --rule: #343a41; --wire: #6c757f; --line: #59616a;
+    --link: #8fb0f5; --link-wash: #24324d;
+    --bug: #f2765e; --risk: #e3a948; --gap: #a7afb8;
+    --panel: #1f2226;
   }
 }
 * { box-sizing: border-box; }
 html, body { height: 100%; }
-body { margin: 0; background: var(--canvas); color: var(--ink);
-  font: 14px/1.5 Inter, system-ui, sans-serif; display: grid; grid-template-rows: auto 1fr; }
-.mono, .cite { font-family: "JetBrains Mono", ui-monospace, monospace; }
+body { margin: 0; background: var(--sheet); color: var(--ink);
+  font: 14px/1.5 var(--font); display: grid; grid-template-rows: auto 1fr; }
 button { font: inherit; color: inherit; }
+code { font: 12.5px/1.4 ui-monospace, Menlo, monospace; }
 
-header { display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 12px 18px;
   border-bottom: 1px solid var(--rule); background: var(--panel); min-width: 0; }
-#back { width: 30px; height: 30px; flex: none; border-radius: 8px; border: 1px solid var(--rule);
-  background: var(--box); cursor: pointer; }
-#back:disabled { opacity: .3; cursor: default; }
-#crumbs { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; font-size: 16px; font-weight: 600; min-width: 0; }
-#crumbs button { font-weight: 400; color: var(--soft); background: none; border: 0; padding: 0; cursor: pointer; }
-#crumbs button:hover { color: var(--accent); }
+#back { width: 32px; height: 32px; flex: none; border-radius: 4px; border: 1px solid var(--rule);
+  background: var(--card); cursor: pointer; font-size: 16px; }
+#back:disabled { visibility: hidden; }
+#crumbs { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; font-size: 20px;
+  font-weight: 700; letter-spacing: -.01em; min-width: 0; }
+#crumbs button { font-weight: 500; color: var(--pencil); background: none; border: 0; padding: 0; cursor: pointer; }
+#crumbs button:hover { color: var(--link); }
 #crumbs .sep { color: var(--faint); font-weight: 400; }
-#legend { margin-left: auto; display: flex; gap: 14px; color: var(--soft); font-size: 12px; flex-wrap: wrap; }
-#legend span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
-#legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
-@media (max-width: 860px) { #legend { display: none; } }
+#legend { margin-left: auto; display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: center;
+  color: var(--pencil); font-size: 12.5px; }
+#legend span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+#legend svg { overflow: visible; }
+#legend .hint { color: var(--ink); font-weight: 500; padding-right: 16px; border-right: 1px solid var(--rule); }
+@media (max-width: 860px) { #legend { margin-left: 0; flex-basis: 100%; } }
 
 main { display: grid; grid-template-columns: minmax(0, 1fr) 380px; min-height: 0; }
-@media (max-width: 860px) { main { grid-template-columns: 1fr; grid-template-rows: 60vh auto; } }
+@media (max-width: 860px) { main { grid-template-columns: 1fr; grid-template-rows: 62vh auto; } }
 
-#stage { position: relative; overflow: hidden; min-height: 0; cursor: grab; touch-action: none;
-  background-image: radial-gradient(var(--dot) 1px, transparent 1px); background-size: 18px 18px; }
+#stage { position: relative; overflow: hidden; min-height: 0; cursor: grab; touch-action: none; outline: none; }
 #stage.dragging { cursor: grabbing; }
 #tools { position: absolute; right: 14px; bottom: 14px; display: flex; border: 1px solid var(--rule);
-  border-radius: 8px; overflow: hidden; background: var(--box); box-shadow: var(--shadow); }
-#tools button { min-width: 34px; height: 30px; border: 0; background: none; cursor: pointer; padding: 0 8px; font-size: 13px; }
+  border-radius: 4px; overflow: hidden; background: var(--card); }
+#tools button { min-width: 36px; height: 32px; border: 0; background: none; cursor: pointer; padding: 0 10px; font-size: 13px; }
 #tools button + button { border-left: 1px solid var(--rule); }
+#tools button:hover { color: var(--link); }
 
 /* Pele's drawing, themed to the page */
 #canvas { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
-#canvas svg.pele { --pele-bg: var(--canvas); --pele-fg: var(--ink); --pele-muted: var(--soft); --pele-line: var(--wire);
-  --pele-surface: var(--box); --pele-surface-alt: var(--panel); --pele-border: var(--rule); --pele-accent: var(--accent);
-  --pele-font: Inter, system-ui, sans-serif; --pele-radius: 8px; display: block; overflow: visible; }
+#canvas svg.pele { --pele-bg: var(--sheet); --pele-fg: var(--ink); --pele-muted: var(--pencil); --pele-line: var(--wire);
+  --pele-surface: var(--card); --pele-surface-alt: var(--panel); --pele-border: var(--line); --pele-accent: var(--link);
+  --pele-font: var(--font); --pele-radius: 3px; display: block; overflow: visible; }
+#canvas .pele-edge path:not(.pele-marker) { stroke-width: 1.25; }
+#canvas .pele-edge-label text { fill: var(--pencil); }
 .box { cursor: pointer; }
-.box :is(rect, path, polygon, ellipse) { stroke-width: 1.25; }
-.box.kservice :is(rect, path, polygon), .box.kgroup :is(rect, path, polygon), .box.kcomponent :is(rect, path, polygon) { stroke: var(--accent) !important; }
-.box.kdatastore :is(rect, path, polygon, ellipse) { stroke: var(--data) !important; fill: var(--data-wash); }
-.box.kqueue :is(rect, path, polygon) { stroke: var(--async) !important; fill: var(--async-wash); }
-.box.kexternal :is(rect, path, polygon) { stroke: var(--wire) !important; stroke-dasharray: 4 3; fill: var(--ext-wash); }
+.box :is(rect, path, polygon, ellipse) { stroke: var(--line); stroke-width: 1.25; }
+.box.kexternal :is(rect, path, polygon) { stroke-dasharray: 5 3; fill: var(--sheet); }
 .box.unverified :is(rect, path, polygon, ellipse) { stroke-dasharray: 2 3; }
-.box text.pele-label tspan:first-child { font-weight: 600; }
-.box text.pele-label tspan:not(:first-child) { fill: var(--soft); }
-.box:hover :is(rect, path, polygon, ellipse), .box.selected :is(rect, path, polygon, ellipse) { stroke-width: 2.5; }
+.box text.pele-label tspan:first-child { font-weight: 600; fill: var(--ink); }
+.box text.pele-label tspan:not(:first-child) { fill: var(--pencil); }
+/* Only the box's own outline, not the stacked card or the issue tag inside it. */
+.box:hover > :is(rect, path, polygon, ellipse):not(.stack) { stroke: var(--ink); }
+.box.selected > :is(rect, path, polygon, ellipse):not(.stack) { stroke: var(--link); stroke-width: 2; fill: var(--link-wash); }
 .box:focus { outline: none; }
-.box .stack { fill: var(--box) !important; stroke-width: 1 !important; stroke-dasharray: none !important; opacity: .9; }
-.box .pill.bug rect { fill: var(--bug); } .box .pill.risk rect { fill: var(--risk); } .box .pill.gap rect { fill: var(--gap); }
-.box .pill text { fill: #fff; font-size: 10.5px; font-weight: 600; }
-.wire.lit path { stroke: var(--accent); stroke-width: 2; }
-.wire.lit path.pele-marker { fill: var(--accent); }
-.focus .wire:not(.lit) { opacity: .15; }
-.focus .box:not(.near) { opacity: .4; }
+.box:focus-visible { outline: 2px solid var(--link); outline-offset: 5px; }
+.box .stack { fill: var(--card) !important; stroke-width: 1 !important; stroke-dasharray: none !important; }
+.tag rect { stroke: none !important; }
+.tag.bug rect { fill: var(--bug); } .tag.risk rect { fill: var(--risk); } .tag.gap rect { fill: var(--gap); }
+.tag circle { fill: var(--card); stroke: none !important; }
+.tag text { fill: #fff; font-size: 11px; font-weight: 700; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tag text { fill: #1a1d21; } }
+.wire.lit path:not(.pele-marker) { stroke: var(--link); stroke-width: 2; }
+.wire.lit path.pele-marker { fill: var(--link); }
+.focus .wire:not(.lit) { opacity: .4; }
+.focus .box:not(.near) { opacity: .65; }
 @media (prefers-reduced-motion: no-preference) { .wire, .box { transition: opacity .12s; } }
 
 /* Panel */
-aside { background: var(--panel); border-left: 1px solid var(--rule); overflow: auto; padding: 20px 20px 40px; }
+aside { background: var(--panel); border-left: 1px solid var(--rule); overflow: auto; padding: 22px 22px 48px; }
 @media (max-width: 860px) { aside { border-left: 0; border-top: 1px solid var(--rule); } }
-aside h2 { font-size: 18px; line-height: 1.25; margin: 0; }
-aside h3 { font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--faint);
-  margin: 22px 0 6px; font-weight: 600; }
+aside h2 { font-size: 20px; line-height: 1.2; margin: 0; letter-spacing: -.01em; }
+aside h3 { font-size: 14px; color: var(--ink); margin: 26px 0 8px; font-weight: 600;
+  padding-bottom: 6px; border-bottom: 1px solid var(--rule); }
 aside p { margin: 6px 0; }
-.meta { color: var(--soft); font-size: 12.5px; margin-top: 2px; }
-.lede { font-size: 14px; margin-top: 10px; }
-.primary { margin-top: 12px; font-weight: 600; color: #fff; background: var(--accent); border: 0;
-  border-radius: 7px; padding: 6px 12px; cursor: pointer; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .primary { color: #0b1514; } }
-.issue { border-left: 3px solid var(--risk); background: var(--risk-wash); border-radius: 0 6px 6px 0;
-  padding: 7px 10px; margin: 6px 0; font-size: 13px; }
-.issue.bug { border-color: var(--bug); background: var(--bug-wash); }
-.issue.gap { border-color: var(--gap); background: var(--gap-wash); }
-.issue .sev { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--risk); }
+.meta { color: var(--pencil); font-size: 13px; margin-top: 4px; }
+.lede { font-size: 15px; line-height: 1.5; margin-top: 12px; }
+.counts { color: var(--pencil); font-size: 13px; margin-top: 10px; }
+.primary { margin-top: 14px; font-weight: 600; color: var(--link); background: var(--card);
+  border: 1px solid var(--link); border-radius: 4px; padding: 6px 12px; cursor: pointer; }
+.primary:hover { background: var(--link-wash); }
+.issue { border-left: 3px solid var(--risk); padding: 2px 0 2px 12px; margin: 18px 0; font-size: 13.5px; }
+.issue.bug { border-color: var(--bug); } .issue.gap { border-color: var(--gap); }
+.issue .head { display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; margin-bottom: 2px; }
+.issue .sev { font-size: 12.5px; font-weight: 700; color: var(--risk); }
 .issue.bug .sev { color: var(--bug); } .issue.gap .sev { color: var(--gap); }
-.issue button.on { text-align: left; }
-.issue .on { font-size: 12px; font-weight: 600; background: none; border: 0; padding: 0; cursor: pointer; color: var(--ink); }
-.issue .on:hover { color: var(--accent); }
-.row { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 6px; align-items: baseline;
-  padding: 5px 0; border-bottom: 1px solid var(--rule); font-size: 13px; }
+.issue .on { font-size: 12.5px; font-weight: 500; background: none; border: 0; padding: 0; cursor: pointer;
+  color: var(--pencil); text-align: left; text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 3px; }
+.issue .on:hover { color: var(--link); }
+.issue.flash { background: var(--link-wash); }
+@media (prefers-reduced-motion: no-preference) { .issue { transition: background .6s; } }
+.row { padding: 7px 0; border-bottom: 1px solid var(--rule); font-size: 13.5px; }
 .row:last-child { border-bottom: 0; }
-.row .dir { color: var(--faint); }
-.row .who { font-weight: 500; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
-.row .who:hover { color: var(--accent); }
-.row .what { color: var(--soft); }
-.cites { display: inline-flex; flex-wrap: wrap; gap: 2px 8px; }
-a.cite { color: var(--accent); text-decoration: none; font-size: 11.5px; white-space: nowrap; }
+.row .who { font-weight: 600; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
+.row .who:hover { color: var(--link); }
+.row .what { color: var(--pencil); }
+.cites { display: flex; flex-wrap: wrap; gap: 0 12px; margin-top: 2px; }
+a.cite { color: var(--link); text-decoration: none; font-size: 12.5px; font-variant-numeric: tabular-nums; }
 a.cite:hover { text-decoration: underline; }
-details { margin-top: 18px; }
-details summary { cursor: pointer; font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); font-weight: 600; }
-details p { font-size: 13px; color: var(--soft); }
-.counts { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--soft); font-size: 12.5px; margin-top: 10px; }
-.empty-note { color: var(--soft); font-size: 13px; }
+.meta .cites { margin-top: 4px; }
+details { margin-top: 22px; }
+details summary { cursor: pointer; font-size: 13px; font-weight: 600; }
+details p { font-size: 13.5px; color: var(--pencil); }
+.empty-note { color: var(--pencil); font-size: 13.5px; }
+.empty-note button { background: none; border: 0; padding: 0; cursor: pointer; color: var(--link); font-weight: 500; }
 
 /* Call paths */
-#paths { position: absolute; inset: 0; overflow: auto; padding: 28px; cursor: default; background: var(--canvas); }
-.path { max-width: 820px; margin: 0 auto 28px; background: var(--box); border: 1px solid var(--rule);
-  border-radius: 10px; box-shadow: var(--shadow); }
-.path h2 { font-size: 15px; margin: 0; padding: 12px 16px; border-bottom: 1px solid var(--rule); }
-.path ol { list-style: none; margin: 0; padding: 6px 0; counter-reset: s; }
-.path li { counter-increment: s; display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 8px;
-  padding: 7px 16px; align-items: baseline; font-size: 13.5px; }
-.path li::before { content: counter(s); color: var(--faint); font-size: 12px; text-align: right; }
-.path li + li { border-top: 1px dashed var(--rule); }
-.empty { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; color: var(--soft); text-align: center; cursor: default; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#paths { position: absolute; inset: 0; overflow: auto; padding: 32px 28px; cursor: default; }
+.path { max-width: 760px; margin: 0 auto 36px; }
+.path h2 { font-size: 17px; margin: 0 0 6px; letter-spacing: -.01em; }
+.path ol { list-style: none; margin: 0; padding: 0; counter-reset: s; border-left: 1px solid var(--line); margin-left: 13px; }
+.path li { counter-increment: s; position: relative; padding: 9px 0 9px 28px; font-size: 14.5px; }
+.path li::before { content: counter(s); position: absolute; left: -13px; top: 9px; width: 26px; height: 26px;
+  border-radius: 50%; background: var(--sheet); border: 1px solid var(--line); color: var(--pencil);
+  font-size: 12px; font-weight: 600; display: grid; place-items: center; line-height: 1; }
+.path li .call { display: block; padding-top: 2px; }
+.flag { display: inline-block; font-size: 11.5px; font-weight: 700; color: #fff; border: 0; border-radius: 2px; padding: 1px 6px;
+  background: var(--risk); cursor: pointer; }
+.path .cites { align-items: center; gap: 2px 8px; }
+.path .cites .flag + a.cite { margin-left: 4px; }
+.flag:hover { text-decoration: underline; }
+.flag.bug { background: var(--bug); } .flag.gap { background: var(--gap); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .flag { color: #1a1d21; } }
+.empty { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; color: var(--pencil); text-align: center; cursor: default; }
+.empty code { user-select: all; background: var(--card); border: 1px solid var(--rule); border-radius: 3px; padding: 2px 6px; color: var(--ink); }
+:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
 </style>
 </head>
 <body>
 <header>
   <button id="back" title="Up one level (Esc)" aria-label="Up one level">←</button>
   <nav id="crumbs" aria-label="Level"></nav>
-  <div id="legend" aria-hidden="true"></div>
+  <div id="legend"></div>
 </header>
 <main>
-  <div id="stage"></div>
+  <div id="stage" tabindex="-1"></div>
   <aside id="panel" aria-live="polite"></aside>
 </main>
 <script id="map-data" type="application/json">__DATA__</script>
@@ -170,9 +186,10 @@ const ROOT = MAP.__root;
 const nodes = MAP.nodes || [], edges = MAP.edges || [], paths = MAP.paths || [];
 const findings = MAP.findings || [], unknowns = MAP.unknowns || [];
 const byId = new Map(nodes.map(n => [n.id, n]));
-const KIND = { service: 'Service', datastore: 'Datastore', queue: 'Queue', external: 'Outside system',
-  group: 'Group', component: 'Component' };
+const KIND = { service: 'service', datastore: 'datastore', queue: 'queue', external: 'outside system',
+  group: 'group', component: 'component' };
 const SEVERITY = ['bug', 'risk', 'gap'];
+const SEV_LABEL = { bug: 'Bug', risk: 'Risk', gap: 'Gap' };
 
 let trail = [], selected = null, view = { x: 0, y: 0, k: 1 }, graph = null;
 
@@ -183,6 +200,9 @@ const canOpen = n => childrenOf(n.id).length > 0 || pathsOf(n.id).length > 0;
 const current = () => (trail.length ? byId.get(trail[trail.length - 1]) : null);
 const sevOf = f => (SEVERITY.includes(f.severity) ? f.severity : 'risk');
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+const sentence = list => (list.length < 2 ? list.join('') : list.slice(0, -1).join(', ') + ' and ' + list[list.length - 1]);
+// A component's tech already says what it is ("Service object"), and the bare word says nothing.
+const kindLine = n => (n.kind === 'component' ? n.tech || '' : [n.tech, KIND[n.kind] || n.kind].filter(Boolean).join(' '));
 
 // A box's issue count covers everything inside it, so a parent signals what its levels hold.
 function subtree(id) {
@@ -193,22 +213,50 @@ function subtree(id) {
 const issuesUnder = id => { const s = subtree(id); return findings.filter(f => s.has(f.node)); };
 const worst = list => SEVERITY.find(s => list.some(f => sevOf(f) === s));
 
-function cite(c) {
+function parseCite(c) {
   const m = /^(.+?):(\d+)(?:-(\d+))?$/.exec(c);
-  if (!m) return `<span class="cite">${esc(c)}</span>`;
-  const short = m[1].split('/').pop() + ':' + m[2] + (m[3] ? '-' + m[3] : '');
-  return `<a class="cite" href="vscode://file${encodeURI(ROOT + '/' + m[1])}:${m[2]}" title="${esc(c)}">${esc(short)}</a>`;
+  return m && { file: m[1], from: +m[2], to: +(m[3] || m[2]) };
+}
+function cite(c) {
+  const r = parseCite(c);
+  if (!r) return `<span class="cite">${esc(c)}</span>`;
+  const short = r.file.split('/').pop() + ':' + r.from + (r.to !== r.from ? '-' + r.to : '');
+  return `<a class="cite" href="vscode://file${encodeURI(ROOT + '/' + r.file)}:${r.from}" title="${esc(c)}">${esc(short)}</a>`;
 }
 const cites = list => (list && list.length ? `<span class="cites">${list.map(cite).join('')}</span>` : '');
+// A finding belongs to a call path step when they cite overlapping lines of the same file.
+const overlaps = (a, b) => (a || []).some(x => (b || []).some(y => {
+  const p = parseCite(x), q = parseCite(y);
+  return p && q && p.file === q.file && p.from <= q.to && q.from <= p.to;
+}));
 
-function go(id) { trail.push(id); selected = null; render(); }
-function up(depth) { trail = trail.slice(0, depth); selected = null; render(); }
+function go(id) { trail.push(id); selected = null; render(); document.getElementById('stage').focus({ preventScroll: true }); }
+// Going up selects and focuses the box you came out of, so you keep your place.
+function up(depth) {
+  const from = trail[depth];
+  trail = trail.slice(0, depth); selected = null; render();
+  const box = from && document.querySelector(`#canvas .box[data-id="${CSS.escape(from)}"]`);
+  if (box) box.focus({ preventScroll: true });
+}
 
-function legend() {
-  document.getElementById('legend').innerHTML =
-    `<span><i style="background:var(--accent)"></i>service</span><span><i style="background:var(--async)"></i>queue</span>` +
-    `<span><i style="background:var(--data)"></i>datastore</span><span><i style="border:1px dashed var(--wire);background:var(--ext-wash)"></i>outside</span>` +
-    `<span><svg width="22" height="6"><path d="M0 3h22" stroke="var(--wire)" stroke-dasharray="1.5 3.5" stroke-linecap="round"/></svg>inferred</span>`;
+const tagKey = (sev, text) => `<span><svg width="20" height="12"><rect x="0" y="0" width="20" height="12" rx="2" fill="var(--${sev})"/>` +
+  `<circle cx="4" cy="6" r="1.5" fill="var(--card)"/></svg>${text}</span>`;
+function legend(onPaths) {
+  const el = document.getElementById('legend');
+  if (onPaths) {
+    el.innerHTML = `<span class="hint">Click a flag to find its issue in the panel</span>` +
+      tagKey('bug', 'bug: wrong today') + tagKey('risk', 'risk: could go wrong') + tagKey('gap', 'gap: missing or unknown');
+    return;
+  }
+  const ln = 'stroke="var(--line)" fill="var(--card)" stroke-width="1.25"';
+  el.innerHTML =
+    `<span class="hint">Double-click a box to open it</span>` +
+    `<span><svg width="16" height="12"><rect x="3" y="3" width="13" height="9" rx="1.5" ${ln}/><rect x="0" y="0" width="13" height="9" rx="1.5" ${ln}/></svg>has a level inside</span>` +
+    `<span><svg width="12" height="14"><path d="M1 3v8c0 2.5 10 2.5 10 0V3" ${ln}/><ellipse cx="6" cy="3" rx="5" ry="2" ${ln}/></svg>datastore</span>` +
+    `<span><svg width="16" height="11"><path d="M4 1h11l-3 9H1z" ${ln}/></svg>queue</span>` +
+    `<span><svg width="18" height="11"><rect x="1" y="1" width="16" height="9" rx="4.5" ${ln} stroke-dasharray="3 2" fill="none"/></svg>outside system</span>` +
+    tagKey('bug', 'has a bug inside') + tagKey('risk', 'risks, no bugs') + tagKey('gap', 'gaps only') +
+    `<span><svg width="22" height="6"><path d="M0 3h22" stroke="var(--wire)" stroke-width="1.5" stroke-dasharray="1.5 3.5" stroke-linecap="round"/></svg>inferred call</span>`;
 }
 
 function render() {
@@ -217,21 +265,33 @@ function render() {
   const crumbs = document.getElementById('crumbs');
   const parts = [MAP.repo || 'Map', ...trail.map(id => byId.get(id)?.name)];
   crumbs.innerHTML = parts.map((p, i) => i === parts.length - 1
-    ? `<span>${esc(p)}</span>`
+    ? `<span aria-current="page">${esc(p)}</span>`
     : `<button data-depth="${i}">${esc(p)}</button><span class="sep">/</span>`).join('');
   crumbs.querySelectorAll('button').forEach(b => (b.onclick = () => up(+b.dataset.depth)));
 
   const stage = document.getElementById('stage');
   const boxes = childrenOf(here ? here.id : null);
+  graph = null;
+  legend(!boxes.length && here && pathsOf(here.id).length > 0);
   if (!boxes.length && here && pathsOf(here.id).length) {
     stage.innerHTML = '<div id="paths">' + pathsOf(here.id).map(p =>
       `<section class="path"><h2>${esc(p.title || 'Call path')}</h2><ol>` +
-      p.steps.map(s => `<li><span>${esc(s.call)}</span>${cites(s.cites)}</li>`).join('') + '</ol></section>').join('') + '</div>';
+      p.steps.map(s => {
+        const hits = findings.filter(f => overlaps(f.cites, s.cites));
+        const flags = SEVERITY.map(sev => {
+          const mine = hits.filter(f => sevOf(f) === sev);
+          if (!mine.length) return '';
+          return `<button class="flag ${sev}" data-findings="${mine.map(f => findings.indexOf(f)).join(' ')}" title="${esc(mine.map(f => f.text).join('\n\n'))}">` +
+            `${mine.length > 1 ? plural(mine.length, sev) : SEV_LABEL[sev]}</button>`;
+        }).join('');
+        return `<li><span class="call">${esc(s.call)}</span><span class="cites">${flags}${(s.cites || []).map(cite).join('')}</span></li>`;
+      }).join('') + '</ol></section>').join('') + '</div>';
+    stage.querySelectorAll('.flag').forEach(b => (b.onclick = () => flash(b.dataset.findings.split(' '))));
   } else if (!boxes.length) {
-    stage.innerHTML = `<p class="empty">${here?.loaded ? `Nothing inside ${esc(here.name)} is worth a box.`
-      : `Not mapped yet. Run <span class="mono">/map more detail on ${esc(here?.name || '')}</span>.`}</p>`;
+    stage.innerHTML = `<p class="empty">${here?.loaded ? `Nothing inside ${esc(here.name)} is big enough for its own box.`
+      : `${esc(here?.name || 'This level')} isn't mapped yet. To map it, run <code>/map more detail on ${esc(here?.name || '')}</code>`}</p>`;
   } else if (!window.pele) {
-    stage.innerHTML = '<p class="empty">The diagram draws with Pele from cdn.jsdelivr.net. Check the connection and reload.</p>';
+    stage.innerHTML = '<p class="empty">The diagram needs Pele from cdn.jsdelivr.net. Check your connection, then reload.</p>';
   } else {
     draw(stage, boxes);
   }
@@ -257,7 +317,7 @@ const clip = (s, max) => (s.length > max ? s.slice(0, max - 1) + '…' : s);
 
 // Pele lays out and draws Mermaid flowchart text left to right; callers land on the left and
 // what they call (datastores, queues, outside systems) on the right. The page then adds what
-// Mermaid cannot say: issue counts, selection, and clicks.
+// Mermaid cannot say: issue tags, selection, and clicks.
 function draw(stage, boxes) {
   const key = new Map(boxes.map((b, i) => [b.id, 'n' + i]));
   const back = new Map([...key].map(([id, k]) => [k, id]));
@@ -276,7 +336,7 @@ function draw(stage, boxes) {
     lines.push(`  ${key.get(w.from)} ${w.inferred ? '-.->' : '-->'}${label ? `|"${text(label)}"|` : ''} ${key.get(w.to)}`);
   }
   const { svg } = pele.render(lines.join('\n'), {
-    responsive: false, fontSize: 13, fontFamily: 'Inter, system-ui, sans-serif', idPrefix: 'map',
+    responsive: false, fontSize: 13, fontFamily: 'Archivo, system-ui, sans-serif', idPrefix: 'map',
   });
   stage.innerHTML = `<div id="canvas">${svg}</div>` +
     '<div id="tools"><button data-z="-1" aria-label="Zoom out">−</button><button data-z="fit" title="Fit to screen">Fit</button><button data-z="1" aria-label="Zoom in">+</button></div>';
@@ -287,7 +347,7 @@ function draw(stage, boxes) {
     g.dataset.id = id;
     g.setAttribute('tabindex', '0');
     g.setAttribute('role', 'button');
-    g.setAttribute('aria-label', n.name);
+    g.setAttribute('aria-pressed', String(selected === id));
     if (selected === id) g.classList.add('selected');
     decorate(g, n);
   });
@@ -304,22 +364,23 @@ function draw(stage, boxes) {
   interact(stage, el);
 }
 
-// The issue count and the open mark go on after the SVG is in the page,
+// The issue tag and the stacked card go on after the SVG is in the page,
 // since they are placed from each box's measured size.
 function decorate(g, n) {
   const issues = issuesUnder(n.id);
-  const tip = `${n.name}${n.tech ? ` (${n.tech})` : ''}: ${n.summary || ''}` +
-    (issues.length ? `\n${plural(issues.length, 'issue')}` : '') + (canOpen(n) ? '\nDouble-click to open' : '');
-  g.insertAdjacentHTML('afterbegin', `<title>${esc(tip)}</title>`);
+  const inside = childrenOf(n.id).length ? plural(childrenOf(n.id).length, 'part') : plural(pathsOf(n.id).length, 'call path');
+  g.setAttribute('aria-label', [n.name, issues.length ? plural(issues.length, 'issue') : '',
+    canOpen(n) ? `${inside} inside, press Enter to open` : ''].filter(Boolean).join(', '));
+  g.insertAdjacentHTML('afterbegin', `<title>${esc(`${n.name}${n.tech ? ` (${n.tech})` : ''}: ${n.summary || ''}`)}</title>`);
   g._decorate = () => {
     const box = g.getBBox();
-    let extra = '';
-    if (issues.length) {
-      extra += `<g class="pill ${worst(issues)}"><rect x="${box.x + box.width - 14}" y="${box.y - 8}" width="${issues.length > 9 ? 26 : 20}" height="16" rx="8"/>` +
-        `<text x="${box.x + box.width - 14 + (issues.length > 9 ? 13 : 10)}" y="${box.y + 3.5}" text-anchor="middle">${issues.length}</text></g>`;
-    }
     if (n.verified === false) g.classList.add('unverified');
-    g.insertAdjacentHTML('beforeend', extra);
+    // The tag clips onto the box's top edge, clear of the wires that meet its sides.
+    if (issues.length) {
+      const label = String(issues.length), w = 18 + label.length * 7, x = box.x + box.width - w - 12, y = box.y - 8;
+      g.insertAdjacentHTML('beforeend', `<g class="tag ${worst(issues)}"><rect x="${x}" y="${y}" width="${w}" height="16" rx="2"/>` +
+        `<circle cx="${x + 5}" cy="${y + 8}" r="1.6"/><text x="${x + 11}" y="${y + 12}">${label}</text></g>`);
+    }
     // A box with a level inside draws as a stack of cards.
     const shape = g.querySelector('rect, path, polygon, ellipse');
     if (canOpen(n) && shape) {
@@ -336,7 +397,7 @@ function apply() { graph.canvas.style.transform = `translate(${view.x}px, ${view
 // The Fit button shows the whole level, however small that makes it.
 function fit(whole = false) {
   const r = document.getElementById('stage').getBoundingClientRect(), pad = 32;
-  const k = Math.max(whole ? 0 : 0.6, Math.min(1.15, (r.width - pad * 2) / graph.width, (r.height - pad * 2) / graph.height));
+  const k = Math.max(whole ? 0 : 0.75, Math.min(1.15, (r.width - pad * 2) / graph.width, (r.height - pad * 2) / graph.height));
   view = { k, x: Math.max(pad, (r.width - graph.width * k) / 2), y: Math.max(pad, (r.height - graph.height * k) / 2) };
   apply();
 }
@@ -403,7 +464,10 @@ function select(id) {
   selected = id;
   const svg = document.querySelector('#canvas svg');
   if (svg) {
-    svg.querySelectorAll('.box').forEach(b => b.classList.toggle('selected', b.dataset.id === id));
+    svg.querySelectorAll('.box').forEach(b => {
+      b.classList.toggle('selected', b.dataset.id === id);
+      b.setAttribute('aria-pressed', String(b.dataset.id === id));
+    });
     light(svg, id);
   }
   panel();
@@ -411,19 +475,20 @@ function select(id) {
 
 // ---------- Side panel ----------
 
-// A card for a finding deeper than this level names the box here that holds it and opens it.
+// The owner link on a card jumps to the box that holds the finding and points at the card there.
 function issueCard(f, showOwner, holder) {
-  const n = byId.get(f.node), sev = sevOf(f);
+  const n = byId.get(f.node), sev = sevOf(f), i = findings.indexOf(f);
   const owner = holder && holder.id !== n?.id
-    ? ` · <button class="on" data-open="${esc(holder.id)}">${esc(holder.name)} › ${esc(n?.name || '')}</button>`
-    : showOwner && n ? ` · <button class="on" data-pick="${esc(n.id)}">${esc(n.name)}</button>` : '';
-  return `<div class="issue ${sev}"><span class="sev">${sev}</span>` + owner +
+    ? `<button class="on" data-pick="${esc(n?.id)}" data-finding="${i}">in ${esc(holder.name)} › ${esc(n?.name || '')}</button>`
+    : showOwner && n ? `<button class="on" data-pick="${esc(n.id)}" data-finding="${i}">in ${esc(n.name)}</button>` : '';
+  return `<div class="issue ${sev}" data-finding="${i}"><div class="head"><span class="sev">${SEV_LABEL[sev]}</span>${owner}</div>` +
     `<div>${esc(f.text)}</div>${cites(f.cites)}</div>`;
 }
 const bySeverity = list => [...list].sort((a, b) => SEVERITY.indexOf(sevOf(a)) - SEVERITY.indexOf(sevOf(b)));
 
 function panel() {
   const el = document.getElementById('panel');
+  el.scrollTop = 0;
   const here = current();
   const n = selected ? byId.get(selected) : null;
 
@@ -433,37 +498,43 @@ function panel() {
     // Bugs are wrong today, so one deep inside a box still surfaces at the level that shows the box.
     const holderOf = new Map();
     levelBoxes.forEach(b => issuesUnder(b.id).forEach(f => f.node !== b.id && sevOf(f) === 'bug' && holderOf.set(f, b)));
-    const issues = bySeverity([...findings.filter(f => atLevel.has(f.node)), ...holderOf.keys()]);
+    // A call path level also lists findings elsewhere that cite lines its steps run through.
+    const steps = here ? pathsOf(here.id).flatMap(p => p.steps) : [];
+    const onSteps = bySeverity(findings.filter(f => steps.some(s => overlaps(f.cites, s.cites))));
+    const issues = bySeverity([...findings.filter(f => atLevel.has(f.node) && !onSteps.includes(f)), ...holderOf.keys()]);
     const deeper = levelBoxes.map(b => [b, issuesUnder(b.id).filter(f => f.node !== b.id && !holderOf.has(f)).length])
       .filter(([, c]) => c > 0);
     const gaps = unknowns.filter(u => (u.node ?? null) === (here?.id ?? null) || levelBoxes.some(b => b.id === u.node));
     const kinds = {};
     levelBoxes.forEach(b => (kinds[b.kind] = (kinds[b.kind] || 0) + 1));
-    const counts = Object.entries(kinds).map(([k, c]) => plural(c, (KIND[k] || k).toLowerCase())).join(' · ');
+    const counts = sentence(Object.entries(kinds).map(([k, c]) => plural(c, KIND[k] || k)));
     el.innerHTML = (here
-      ? `<h2>${esc(here.name)}</h2><div class="meta">${esc([KIND[here.kind], here.tech].filter(Boolean).join(' · '))} ${cites(here.cites)}</div>
+      ? `<h2>${esc(here.name)}</h2><div class="meta">${esc(kindLine(here))}${cites(here.cites)}</div>
          <p class="lede">${esc(here.summary || '')}</p>`
       : (MAP.summary ? `<p class="lede" style="margin-top:0">${esc(MAP.summary)}</p>` : '')) +
-      (counts ? `<div class="counts">${esc(counts)}</div>` : '') +
-      (issues.length ? `<h3>${plural(issues.length, 'issue')}</h3>` + issues.map(f => issueCard(f, f.node !== here?.id, holderOf.get(f))).join('') : '') +
-      (deeper.length ? `<p class="empty-note">More inside ` + deeper.map(([b, c]) =>
-        `<button class="on" data-open="${esc(b.id)}">${esc(b.name)} (${c})</button>`).join(', ') + '</p>' : '') +
-      (!issues.length && !deeper.length ? '<h3>No issues found</h3>' : '') +
+      (counts ? `<p class="counts">${esc(counts[0].toUpperCase() + counts.slice(1))}.</p>` : '') +
+      (onSteps.length ? `<h3>${plural(onSteps.length, 'issue')} on these call paths</h3>` +
+        onSteps.map(f => issueCard(f, f.node !== here?.id)).join('') : '') +
+      (issues.length ? `<h3>${onSteps.length ? `${plural(issues.length, 'other issue')} in ${esc(here.name)}` : plural(issues.length, 'issue')}</h3>` +
+        issues.map(f => issueCard(f, f.node !== here?.id, holderOf.get(f))).join('') : '') +
+      (deeper.length ? `<p class="empty-note">More issues inside ` + sentence(deeper.map(([b, c]) =>
+        `<button data-open="${esc(b.id)}">${esc(b.name)} (${c})</button>`)) + '</p>' : '') +
+      (!issues.length && !onSteps.length && !deeper.length ? '<h3>No issues found here</h3>' : '') +
       (gaps.length ? `<details><summary>${plural(gaps.length, 'open question')}</summary>` +
         gaps.map(u => `<p>${u.node ? `<strong>${esc(byId.get(u.node)?.name)}</strong>: ` : ''}${esc(u.text)}</p>`).join('') + '</details>' : '');
   } else {
     const into = edges.filter(e => e.to === n.id), out = edges.filter(e => e.from === n.id);
     const row = (e, dir) => {
       const other = byId.get(dir === 'out' ? e.to : e.from);
-      return `<div class="row"><span class="dir">${dir === 'out' ? '→' : '←'}</span>
-        <span><button class="who" data-pick="${esc(other?.id)}">${esc(other?.name)}</button> <span class="what">${esc(e.label || '')}${e.evidence === 'inferred' ? ' (inferred)' : ''}</span></span>${cites(e.cites)}</div>`;
+      return `<div class="row"><button class="who" data-pick="${esc(other?.id)}">${esc(other?.name)}</button>
+        <span class="what">${esc(e.label || '')}${e.evidence === 'inferred' ? ' (inferred)' : ''}</span>${cites(e.cites)}</div>`;
     };
     const own = bySeverity(issuesUnder(n.id));
     const kids = childrenOf(n.id).length, ps = pathsOf(n.id).length;
     el.innerHTML = `<h2>${esc(n.name)}</h2>
-      <div class="meta">${esc([KIND[n.kind] || n.kind, n.tech, n.verified === false ? 'not yet checked' : null].filter(Boolean).join(' · '))} ${cites(n.cites)}</div>
+      <div class="meta">${esc([kindLine(n), n.verified === false ? 'not yet checked' : ''].filter(Boolean).join(', '))}${cites(n.cites)}</div>
       <p class="lede">${esc(n.summary || '')}</p>` +
-      (canOpen(n) ? `<button class="primary" id="open">Open · ${kids ? plural(kids, 'part') : plural(ps, 'call path')}</button>` : '') +
+      (canOpen(n) ? `<button class="primary" id="open">Open ${kids ? plural(kids, 'part') : plural(ps, 'call path')}</button>` : '') +
       (own.length ? `<h3>${plural(own.length, 'issue')}</h3>` + own.map(f => issueCard(f, f.node !== n.id)).join('') : '') +
       (into.length ? '<h3>Called by</h3>' + into.map(e => row(e, 'in')).join('') : '') +
       (out.length ? '<h3>Calls</h3>' + out.map(e => row(e, 'out')).join('') : '') +
@@ -471,16 +542,23 @@ function panel() {
         unknowns.filter(u => u.node === n.id).map(u => `<p>${esc(u.text)}</p>`).join('') + '</details>' : '');
     document.getElementById('open')?.addEventListener('click', () => go(n.id));
   }
-  el.querySelectorAll('[data-pick]').forEach(b => (b.onclick = () => pick(b.dataset.pick)));
+  el.querySelectorAll('[data-pick]').forEach(b => (b.onclick = () => pick(b.dataset.pick, b.dataset.finding)));
   el.querySelectorAll('[data-open]').forEach(b => (b.onclick = () => go(b.dataset.open)));
 }
 
-// Jump to a box from the panel: open the level that holds it, then select it.
-function pick(id) {
+// Jump to a box from the panel: open the level that holds it, select it, and point at the finding if one was clicked.
+function pick(id, finding) {
   const chain = [];
   for (let p = byId.get(id)?.parent; p; p = byId.get(p)?.parent) chain.unshift(p);
   if (chain.join('/') !== trail.join('/')) { trail = chain; selected = id; render(); }
   else select(id);
+  if (finding != null) flash([finding]);
+}
+// Scroll the panel to the cards for these findings and mark them briefly.
+function flash(ids) {
+  const cards = ids.map(i => document.querySelector(`#panel .issue[data-finding="${i}"]`)).filter(Boolean);
+  cards[0]?.scrollIntoView({ block: 'nearest' });
+  cards.forEach(c => { c.classList.add('flash'); setTimeout(() => c.classList.remove('flash'), 1200); });
 }
 
 document.getElementById('back').onclick = () => trail.length && up(trail.length - 1);
@@ -488,9 +566,9 @@ document.addEventListener('keydown', ev => {
   if (ev.key !== 'Escape') return;
   if (selected) select(null); else if (trail.length) up(trail.length - 1);
 });
-window.addEventListener('resize', () => graph && document.querySelector('#canvas') && fit());
-legend();
-render();
+window.addEventListener('resize', () => graph && fit());
+// Pele measures label text to size boxes, so it waits for the web font.
+Promise.all(['400 13px Archivo', '600 13px Archivo'].map(f => document.fonts?.load(f))).catch(() => {}).then(render);
 </script>
 </body>
 </html>
