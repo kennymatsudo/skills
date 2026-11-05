@@ -20,7 +20,7 @@ You own an explanation the user can trust without re-checking it. A short answer
 | 2. Components | The main modules or classes inside one service | Route handler, consumer, or command | Calls between modules | Return types and raised errors |
 | 3. Code | One path, method by method | Function signature | Each call and why it is made | Return values and branches |
 
-Answer at level 1 unless the user asks for detail. "More detail on Y" means one level down, on Y only. Level 3 covers a single path, never a whole service.
+Answer at level 1 unless the user asks for detail. If level 1 would show two hops or fewer, as in a repo with one backend, answer at level 2 and say so in the Overview. "More detail on Y" means one level down, on Y only. Level 3 covers a single path, never a whole service.
 
 ## 1. Scope
 
@@ -53,7 +53,7 @@ Write the answer in the format below. Tag every claim:
 - **Inferred:** mark it `(inferred)` and say from what.
 - **Unknown:** put it in Unknowns.
 
-Done when no sentence makes an untagged claim about behavior.
+Done when no sentence makes an untagged claim about behavior, every Flow line is one sentence naming one hop at the scoped level, and the draft is about 40 lines or fewer.
 
 ## 4. Verify
 
@@ -66,14 +66,17 @@ Done when the script passes on the final text and every verifier finding is reso
 
 ## Format
 
-Drop any section with nothing in it.
+Drop any section with nothing in it. Keep the reply to about 40 lines, diagram included. A hop is one row of the scoped level's Flow column: at level 1 a network call or message between services, at level 2 a call between modules. What happens inside a hop, such as a validation rule, a field name, a retry count, or an error class, belongs one level down, where "more detail on Y" reaches it. When the reply runs long, cut that in-hop detail first, then the lowest-ranked Fences and Unknowns.
 
-- **Overview:** two sentences. What it is and what it does.
-- **Diagram:** at level 1, a mermaid sequence diagram of the main path. At level 2, a sequence diagram or flowchart when more than two components interact. At level 3, a numbered call chain instead.
-- **Entry Points:** each trigger and where it is defined.
-- **Flow:** each hop in order: who calls whom, with what, and why.
-- **Responses:** what comes back at each hop, including error and empty cases.
-- **Fences:** each deliberate-looking oddity, with what the commit or comment says, or "No reason found in the code or commit history. The why skill can dig further."
+- **Overview:** two sentences. What it is and what it does. If the request was ambiguous, add one line naming the target you picked.
+- **Key findings:** up to three, one line each, the ones the reader would act on, such as a path that never completes or a race. Each is repeated with its citation in Fences or Responses.
+- **Diagram:** a plain-text diagram in a code block, drawn with boxes and arrows, so it reads the same in a terminal, a chat window, or a PR. At level 1, the main path between services. At level 2, the components inside the service when more than two interact. At level 3, a numbered call chain instead. Use mermaid only when the user asks for it or the explanation goes into a file that renders it.
+- **Entry Points:** each trigger and where it is defined, one line each.
+- **Flow:** one sentence per hop in order: who calls whom, with what. Add why only when it is not obvious.
+- **Responses:** a table with columns for case, status or return, and what the caller sees, covering success, error, and empty cases.
+- **Fences:** at most three oddities on the path in scope, most consequential first, each with what the commit or comment says, or "No reason found in the code or commit history. The why skill can dig further." Leave out oddities in code the path does not execute, even in the same file or controller.
 - **Unknowns:** what you could not trace, and where you stopped.
+
+Put the citation at the end of its line. Say nothing about the verification step when it passed: no citation counts, no fixes you made along the way.
 
 Reply: the verified explanation in this format, at the scoped level.
