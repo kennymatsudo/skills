@@ -367,27 +367,43 @@ def stale(repo: Path, data: dict) -> dict[str, list[str]]:
     return {node: files for node, files in by_node.items() if files}
 
 
-def merge(repo: Path, data: dict, fragment: dict) -> dict:
-    """Swap the fragment's parent's old children for the fragment's entries."""
+def merge(repo: Path, data: dict, fragment: dict) -> tuple[dict, list[str]]:
+    """Swap the fragment's parent's old children for the fragment's entries, and return notes
+    on what the swap dropped that the fragment did not say to drop."""
     parent = fragment["parent"]
-    # Everything below the parent goes, grandchildren too, so a rebuild leaves no orphans.
-    family = lineage(data.get("nodes", [])).get(parent, {parent})
-    old = {n["id"] for n in data.get("nodes", []) if n["id"] in family and n["id"] != parent
-           and parent in ancestors_of(data, n["id"])}
+    nodes = data.get("nodes", [])
+    old = {n["id"] for n in nodes if n["id"] != parent and parent in ancestors_of(data, n["id"])}
     new = {n["id"] for n in fragment.get("nodes", [])}
-    gone = old | new
+    # A child the fragment keeps keeps what was built inside it, so re-merging a verified
+    # fragment never throws away deeper levels already built. A child the fragment drops
+    # takes everything inside it along.
+    kept = {n["id"] for n in nodes if n.get("parent") == parent and n["id"] in new}
+    inside_kept = {n["id"] for n in nodes if kept & ancestors_of(data, n["id"])}
+    gone = (old - inside_kept) | new
 
     def keep(items: list, *fields: str) -> list:
         return [i for i in items if not any(i.get(f) in gone for f in fields)]
 
-    data["nodes"] = keep(data.get("nodes", []), "id") + fragment.get("nodes", [])
+    notes = []
+    fragment_texts = {(f.get("node"), f.get("text")) for f in fragment.get("findings", [])}
+    for item in data.get("findings", []):
+        if item.get("node") in kept and (item.get("node"), item.get("text")) not in fragment_texts:
+            notes.append(f"dropped finding on {item.get('node')} that the fragment lacks: "
+                         f"\"{item.get('text', '')[:80]}\"; add it to the fragment if a deeper build found it")
+    was_loaded = {n["id"] for n in nodes if n.get("loaded")}
+    fresh = [dict(n, loaded=True) if n["id"] in kept & was_loaded and "loaded" not in n else n
+             for n in fragment.get("nodes", [])]
+    data["nodes"] = keep(nodes, "id") + fresh
     data["edges"] = keep(data.get("edges", []), "from", "to") + fragment.get("edges", [])
     data["findings"] = keep(data.get("findings", []), "node") + fragment.get("findings", [])
     data["unknowns"] = keep(data.get("unknowns", []), "node") + fragment.get("unknowns", [])
-    paths = [p for p in data.get("paths", []) if p.get("node") not in gone]
+    paths = [p for p in data.get("paths", []) if p.get("node") not in gone or p.get("node") in kept]
     if fragment.get("paths"):
         paths = [p for p in paths if p.get("node") != parent]
     data["paths"] = paths + fragment.get("paths", [])
+    kept_paths = sum(1 for p in paths if p.get("node") in kept | inside_kept)
+    if inside_kept or kept_paths:
+        notes.append(f"kept {len(inside_kept)} boxes and {kept_paths} paths already built inside the children it keeps")
     # A rebuild may restate a note it already made about the parent itself.
     for field in ("findings", "unknowns"):
         unique = {}
@@ -397,7 +413,7 @@ def merge(repo: Path, data: dict, fragment: dict) -> dict:
     for node in data["nodes"]:
         if node.get("id") == parent:
             node["loaded"] = True
-    return data
+    return data, notes
 
 
 def cited_lines(node: dict) -> int:
@@ -470,7 +486,7 @@ def main() -> int:
             if fragment.get("parent") not in {n.get("id") for n in data.get("nodes", [])}:
                 print(f"parent {fragment.get('parent')} is not on the map")
                 return 1
-            merged = merge(repo, data, fragment)
+            merged, notes = merge(repo, data, fragment)
             problems = check(repo, merged)
             for problem in problems:
                 print(problem)
@@ -482,6 +498,8 @@ def main() -> int:
             temp.replace(map_path)
             render_page(repo, map_path)
         print(f"Merged {len(fragment.get('nodes', []))} nodes under {fragment['parent']}")
+        for note in notes:
+            print(note)
         return 0
 
     data = load(map_path)
