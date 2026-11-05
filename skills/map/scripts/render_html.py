@@ -119,6 +119,7 @@ aside p { margin: 6px 0; }
 .issue.gap { border-color: var(--gap); background: var(--gap-wash); }
 .issue .sev { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--risk); }
 .issue.bug .sev { color: var(--bug); } .issue.gap .sev { color: var(--gap); }
+.issue button.on { text-align: left; }
 .issue .on { font-size: 12px; font-weight: 600; background: none; border: 0; padding: 0; cursor: pointer; color: var(--ink); }
 .issue .on:hover { color: var(--accent); }
 .row { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 6px; align-items: baseline;
@@ -331,10 +332,11 @@ function decorate(g, n) {
 }
 
 function apply() { graph.canvas.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.k})`; }
-function fit() {
+// A level opens no smaller than readable, starting at its left edge if it is wider than that.
+// The Fit button shows the whole level, however small that makes it.
+function fit(whole = false) {
   const r = document.getElementById('stage').getBoundingClientRect(), pad = 32;
-  // Never shrink below readable; a level wider than that starts at its left edge and pans.
-  const k = Math.max(0.72, Math.min(1.15, (r.width - pad * 2) / graph.width, (r.height - pad * 2) / graph.height));
+  const k = Math.max(whole ? 0 : 0.6, Math.min(1.15, (r.width - pad * 2) / graph.width, (r.height - pad * 2) / graph.height));
   view = { k, x: Math.max(pad, (r.width - graph.width * k) / 2), y: Math.max(pad, (r.height - graph.height * k) / 2) };
   apply();
 }
@@ -369,7 +371,7 @@ function interact(stage, svg) {
   });
   light(svg, selected);
   stage.querySelectorAll('#tools button').forEach(z => (z.onclick = () => {
-    if (z.dataset.z === 'fit') return fit();
+    if (z.dataset.z === 'fit') return fit(true);
     const r = stage.getBoundingClientRect();
     zoomAt(z.dataset.z === '1' ? 1.2 : 1 / 1.2, r.width / 2, r.height / 2);
   }));
@@ -409,10 +411,13 @@ function select(id) {
 
 // ---------- Side panel ----------
 
-function issueCard(f, showOwner) {
+// A card for a finding deeper than this level names the box here that holds it and opens it.
+function issueCard(f, showOwner, holder) {
   const n = byId.get(f.node), sev = sevOf(f);
-  return `<div class="issue ${sev}"><span class="sev">${sev}</span>` +
-    (showOwner && n ? ` · <button class="on" data-pick="${esc(n.id)}">${esc(n.name)}</button>` : '') +
+  const owner = holder && holder.id !== n?.id
+    ? ` · <button class="on" data-open="${esc(holder.id)}">${esc(holder.name)} › ${esc(n?.name || '')}</button>`
+    : showOwner && n ? ` · <button class="on" data-pick="${esc(n.id)}">${esc(n.name)}</button>` : '';
+  return `<div class="issue ${sev}"><span class="sev">${sev}</span>` + owner +
     `<div>${esc(f.text)}</div>${cites(f.cites)}</div>`;
 }
 const bySeverity = list => [...list].sort((a, b) => SEVERITY.indexOf(sevOf(a)) - SEVERITY.indexOf(sevOf(b)));
@@ -425,8 +430,11 @@ function panel() {
   if (!n) {
     const levelBoxes = childrenOf(here ? here.id : null);
     const atLevel = new Set([here?.id, ...levelBoxes.map(b => b.id)]);
-    const issues = bySeverity(findings.filter(f => atLevel.has(f.node)));
-    const deeper = levelBoxes.map(b => [b, issuesUnder(b.id).length - findings.filter(f => f.node === b.id).length])
+    // Bugs are wrong today, so one deep inside a box still surfaces at the level that shows the box.
+    const holderOf = new Map();
+    levelBoxes.forEach(b => issuesUnder(b.id).forEach(f => f.node !== b.id && sevOf(f) === 'bug' && holderOf.set(f, b)));
+    const issues = bySeverity([...findings.filter(f => atLevel.has(f.node)), ...holderOf.keys()]);
+    const deeper = levelBoxes.map(b => [b, issuesUnder(b.id).filter(f => f.node !== b.id && !holderOf.has(f)).length])
       .filter(([, c]) => c > 0);
     const gaps = unknowns.filter(u => (u.node ?? null) === (here?.id ?? null) || levelBoxes.some(b => b.id === u.node));
     const kinds = {};
@@ -437,7 +445,7 @@ function panel() {
          <p class="lede">${esc(here.summary || '')}</p>`
       : (MAP.summary ? `<p class="lede" style="margin-top:0">${esc(MAP.summary)}</p>` : '')) +
       (counts ? `<div class="counts">${esc(counts)}</div>` : '') +
-      (issues.length ? `<h3>${plural(issues.length, 'issue')}</h3>` + issues.map(f => issueCard(f, f.node !== here?.id)).join('') : '') +
+      (issues.length ? `<h3>${plural(issues.length, 'issue')}</h3>` + issues.map(f => issueCard(f, f.node !== here?.id, holderOf.get(f))).join('') : '') +
       (deeper.length ? `<p class="empty-note">More inside ` + deeper.map(([b, c]) =>
         `<button class="on" data-open="${esc(b.id)}">${esc(b.name)} (${c})</button>`).join(', ') + '</p>' : '') +
       (!issues.length && !deeper.length ? '<h3>No issues found</h3>' : '') +

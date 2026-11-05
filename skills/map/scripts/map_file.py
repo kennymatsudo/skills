@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """Check, stamp, and diff a map file against the repo it describes.
 
+<repo-root> is the folder citations are relative to: the repo, or for a map of one feature
+across several repos, the folder that holds them all. stamp records it in the map relative to
+the folder holding .map/, and every later command reads it from there.
+
 Usage:
   map_file.py check <repo-root> <map.json>   validate structure and every citation
-  map_file.py stamp <repo-root> <map.json>   record the commit and a hash of each cited file
+  map_file.py stamp <repo-root> <map.json>   record the root, the commit, and a hash of each cited file
   map_file.py stale <repo-root> <map.json>   list nodes whose cited files changed since the stamp
   map_file.py merge <repo-root> <map.json> <fragment.json>
       replace one node's children with the fragment's, check the result, and stamp it,
@@ -19,6 +23,7 @@ Exit codes: 0 ok (or nothing stale), 1 problems found (or something stale), 2 us
 import fcntl
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -29,6 +34,8 @@ KINDS = {"service", "datastore", "queue", "external", "group", "component"}
 EVIDENCE = {"config", "client-call", "route", "topic", "inferred"}
 SEVERITY = {"bug", "risk", "gap"}
 MAX_CHILDREN = 20
+# Level 2 is the handful of parts a reader keeps in mind, not one box per file.
+MAX_COMPONENTS = 12
 # A box shows its summary in two short lines; longer text gets cut off mid-thought.
 MAX_SUMMARY = 70
 # An arrow's label names what crosses it in a few words; the call itself belongs in a path.
@@ -37,6 +44,17 @@ MAX_LABEL = 24
 UNREAD = re.compile(
     r"\b(not (yet )?(read|traced|checked|examined|followed|verified|searched|confirmed)"
     r"|did not (read|trace|check|examine|follow|verify)|wasn't (read|traced|checked))\b",
+    re.IGNORECASE,
+)
+# A role says what a box is for. A file path in it describes where the code is, which the
+# citation already shows.
+FILE_IN_ROLE = re.compile(r"(?<![\w.])[a-z_][\w/-]*\.(py|tsx?|jsx?|rb|go|java|kt|rs|php|cs|swift|scala)\b")
+# Code nothing calls is a finding about dead code, not a part of the system, and not an unknown
+# either: whether anything calls it is a question the repo answers.
+DEAD_ROLE = re.compile(
+    r"\bno (non-test )?(caller|callers|writer|reader|service code|code (reads|calls|uses))"
+    r"|\bno (non-test )?code\b[^.;]{0,30}\b(reads|writes|calls|uses)"
+    r"|\b(have|has) no (writer|reader|caller)|\bnothing (reads|calls|uses|writes)",
     re.IGNORECASE,
 )
 # A leaf component this small with nothing it calls is read faster than a call path is built.
@@ -89,6 +107,9 @@ def check_cite(repo: Path, cite: str, line_counts: dict[str, int]) -> str | None
     end = int(end_text) if end_text else start
     if start < 1 or end < start or end > line_counts[path_text]:
         return f"out of range, file has {line_counts[path_text]} lines"
+    # A one-line citation is a claim about that exact line, so a blank one points at nothing.
+    if not end_text and not path.read_text(errors="replace").splitlines()[start - 1].strip():
+        return "is a blank line; cite the line that defines the thing or makes the call"
     return None
 
 
@@ -145,12 +166,16 @@ def lineage(nodes: list[dict]) -> dict[str, set[str]]:
 
 
 def restated(data: dict) -> list[str]:
-    """Findings and unknowns that repeat an earlier one on the same box or a box above or below it."""
+    """Findings and unknowns that repeat an earlier one on the same box, a box above or below it,
+    or, for findings, a box beside it under the same parent."""
     problems = []
     related = lineage(data.get("nodes", []))
+    parent_of = {n.get("id"): n.get("parent") for n in data.get("nodes", [])}
     kept: list[dict] = []
     for item in data.get("findings", []):
-        family = related.get(item.get("node"), {item.get("node")})
+        node = item.get("node")
+        siblings = {i for i, p in parent_of.items() if node in parent_of and p == parent_of[node]}
+        family = related.get(node, {node}) | siblings
         for earlier in kept:
             if earlier.get("node") in family and cites_overlap(item.get("cites", []), earlier.get("cites", [])) \
                     and similar(item.get("text", ""), earlier.get("text", "")):
@@ -209,6 +234,15 @@ def check(repo: Path, data: dict) -> list[str]:
             problems.append(f"node {node_id}: no citation")
         if len(node.get("summary", "")) > MAX_SUMMARY:
             problems.append(f"node {node_id}: summary over {MAX_SUMMARY} characters; say its role, not how it works")
+        if FILE_IN_ROLE.search(node.get("summary", "")):
+            problems.append(f"node {node_id}: summary names a file; say what the box is for, and leave where it is to the citation")
+        if re.search(r"\bbut\b", node.get("summary", ""), re.IGNORECASE):
+            problems.append(f"node {node_id}: summary has a \"but\"; a caveat about what it does belongs in a finding, not its role")
+        if DEAD_ROLE.search(node.get("summary", "")):
+            problems.append(
+                f"node {node_id}: summary says nothing uses it; dead code is not a box. "
+                "Drop it, and if a reader should act on it, record one finding on the box that holds it"
+            )
     problems += shared_code(nodes)
 
     children: dict[str | None, int] = {}
@@ -218,6 +252,19 @@ def check(repo: Path, data: dict) -> list[str]:
         if count > MAX_CHILDREN:
             where = parent or "the top level"
             problems.append(f"{where}: {count} boxes, group them to {MAX_CHILDREN} or fewer")
+        elif kinds.get(parent) in {"service", "group"} and count > MAX_COMPONENTS:
+            problems.append(
+                f"{parent}: {count} components; merge related ones into {MAX_COMPONENTS} or fewer boxes "
+                "by what they do together, each citing all its files"
+            )
+    names = {node.get("id"): node.get("name", "").strip().lower() for node in nodes}
+    for node in nodes:
+        parent = node.get("parent")
+        if parent and names.get(node.get("id")) == names.get(parent):
+            problems.append(
+                f"node {node.get('id')}: same name as its parent {parent}; a box inside repeats nothing "
+                "the parent shows. Map only what is inside it"
+            )
 
     for edge in data.get("edges", []):
         label = f"edge {edge.get('from')} -> {edge.get('to')}"
@@ -251,6 +298,11 @@ def check(repo: Path, data: dict) -> list[str]:
                 f"unknown on {item.get('node')}: \"{item.get('text', '')[:60]}…\" is unread code, "
                 "not an unknown; read it and record what it shows"
             )
+        if DEAD_ROLE.search(item.get("text", "")):
+            problems.append(
+                f"unknown on {item.get('node')}: \"{item.get('text', '')[:60]}…\" says nothing uses some code; "
+                "the repo answers that, so it is a finding if a reader should act on it, else leave it out"
+            )
     for path in data.get("paths", []):
         if path.get("node") not in known:
             problems.append(f"path on missing node {path.get('node')}")
@@ -276,9 +328,26 @@ def head_commit(repo: Path) -> str | None:
     return result.stdout.strip() if result.returncode == 0 else None
 
 
-def stamp(repo: Path, data: dict) -> dict:
+def commits(repo: Path, files: list[str]) -> str | dict[str, str] | None:
+    """The root's commit, or, when the root holds several repos, each cited repo's commit."""
+    whole = head_commit(repo)
+    if whole or not files:
+        return whole
+    tops = sorted({f.split("/", 1)[0] for f in files if "/" in f})
+    found = {top: c for top in tops if (repo / top / ".git").exists() and (c := head_commit(repo / top))}
+    return found or None
+
+
+def commit_text(built) -> str:
+    if isinstance(built, dict):
+        return ", ".join(f"{name} {commit}" for name, commit in built.items())
+    return str(built)
+
+
+def stamp(repo: Path, map_path: Path, data: dict) -> dict:
     files = sorted({f for _, cite in cites_in(data) if (f := cite_file(cite))})
-    data["built_at_commit"] = head_commit(repo)
+    data["root"] = os.path.relpath(repo.resolve(), map_path.resolve().parent.parent)
+    data["built_at_commit"] = commits(repo, files)
     data["files"] = {f: file_hash(repo / f) for f in files if (repo / f).is_file()}
     return data
 
@@ -362,6 +431,20 @@ def queue(data: dict) -> tuple[list[str], list[str]]:
     return [node_id for *_, node_id in sorted(build)], skip
 
 
+def recorded_root(given: Path, map_path: Path) -> Path:
+    """The root a stamped map recorded, so a later run from another folder still finds the code."""
+    try:
+        root = json.loads(map_path.read_text()).get("root")
+    except (OSError, ValueError):
+        return given
+    if not root:
+        return given
+    recorded = (map_path.resolve().parent.parent / root).resolve()
+    if recorded != given.resolve():
+        print(f"Using the root this map records, {recorded}, not {given}", file=sys.stderr)
+    return recorded
+
+
 def render_page(repo: Path, map_path: Path) -> None:
     """Rewrite map.html beside the map so a browser view never shows an old map."""
     script = Path(__file__).with_name("render_html.py")
@@ -377,6 +460,7 @@ def main() -> int:
         print(__doc__.strip(), file=sys.stderr)
         return 2
     command, repo, map_path = sys.argv[1], Path(sys.argv[2]), Path(sys.argv[3])
+    repo = recorded_root(repo, map_path)
 
     if command == "merge":
         fragment = json.loads(Path(sys.argv[4]).read_text())
@@ -394,7 +478,7 @@ def main() -> int:
                 print("Not merged; fix the fragment and run merge again")
                 return 1
             temp = map_path.with_suffix(".tmp")
-            temp.write_text(json.dumps(stamp(repo, merged), indent=2) + "\n")
+            temp.write_text(json.dumps(stamp(repo, map_path, merged), indent=2) + "\n")
             temp.replace(map_path)
             render_page(repo, map_path)
         print(f"Merged {len(fragment.get('nodes', []))} nodes under {fragment['parent']}")
@@ -412,9 +496,9 @@ def main() -> int:
         return 0
 
     if command == "stamp":
-        map_path.write_text(json.dumps(stamp(repo, data), indent=2) + "\n")
+        map_path.write_text(json.dumps(stamp(repo, map_path, data), indent=2) + "\n")
         render_page(repo, map_path)
-        print(f"Stamped at {data['built_at_commit']}, {len(data['files'])} files")
+        print(f"Stamped at {commit_text(data['built_at_commit'])}, {len(data['files'])} files")
         return 0
 
     if command == "queue":
@@ -427,7 +511,7 @@ def main() -> int:
 
     changed = stale(repo, data)
     if not changed:
-        print(f"Fresh: no cited file changed since {data.get('built_at_commit')}")
+        print(f"Fresh: no cited file changed since {commit_text(data.get('built_at_commit'))}")
         return 0
     for node, files in changed.items():
         print(f"{node}: {', '.join(files)}")

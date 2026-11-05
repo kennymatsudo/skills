@@ -34,7 +34,7 @@ Findings and unknowns already recorded for your slice, the boxes above it, and t
 Rules:
 
 - **Follow the wiring, not the names.** A connection counts only when you find the client call, route registration, queue topic, or config that joins both sides. Name which of those it was. A matching name is a guess; report it as inferred.
-- **Runtime-only wiring is an unknown.** Hosts read from env vars nothing in the repo sets, service discovery by name, and flags decided at runtime go under Unknowns, with where you stopped.
+- **Runtime-only wiring is an unknown.** Hosts read from env vars nothing in the repo sets, service discovery by name, and flags decided at runtime go under Unknowns, with where you stopped. So does a deploy value the files say is set elsewhere, such as a size a comment says is changed by hand: report what the file says as an unknown, not a defect.
 - **Stay at the level.** Validation rules, field names, and branches inside one component belong to a deeper level. Leave them out.
 
 Cite every fact as `path/to/file.ext:LINE` or `path/to/file.ext:START-END` from the repo root.

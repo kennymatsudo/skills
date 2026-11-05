@@ -32,6 +32,7 @@ If `.map/map.json` exists, run `map_file.py stale <repo-root> .map/map.json`. Th
 - **No target, no map:** build level 1.
 - **"More detail on X":** if X's children are in the file, show them, verifying them first if any is `"verified": false`, then run step 4 for them. If a background subagent is still building X, wait for it. Otherwise build one level below X, on X only. With no map yet, build level 1 first, so X has a node to hang from.
 - **"Refresh":** rebuild the stale nodes, or the named ones, at their level.
+- **A feature across several repos,** such as "map the checkout feature across these repos": the root is the folder holding those repos, and citations start there, such as `api/app/checkout.rb:12`. Take the feature's code from the docs that describe it, such as the agent instructions and design docs in the folder the user is in, and map only that code. The map goes in that folder's `.map/`. In the steps below, `<repo-root>` means that root; `stamp` records it, and later runs read it from the map.
 - **"Build ahead":** run step 4 only, then reply with one line naming what started. Use it to resume background mapping that stopped.
 
 Done when you can say `level N, covering <whole repo | node X>, from <file | fresh build>`.
@@ -53,7 +54,7 @@ Done when every box has a citation and a role, every arrow has an evidence kind 
 
 ## 3. Write and check
 
-Write a first level 1 straight into `.map/map.json`, with the top-level `summary`. Write anything deeper, or a rebuild, as a fragment, `{ "parent": <node id>, "nodes", "edges", "findings", "unknowns", "paths" }` in `.map/fragments/<parent>.json`, and add it with `map_file.py merge <repo-root> .map/map.json <fragment>`, which swaps out that node's old children under a lock, checks the result, and stamps it. On first write, create `.map/.gitignore` containing `*` so the folder stays out of git without touching the repo's own ignore file. Write nothing outside `.map/`.
+Write a first level 1 straight into `.map/map.json`, with the top-level `summary`. Write anything deeper, or a rebuild, as a fragment, `{ "parent": <node id>, "nodes", "edges", "findings", "unknowns", "paths" }` in `.map/fragments/<parent>.json`, and add it with `map_file.py merge <repo-root> .map/map.json <fragment>`, which swaps out that node's old children under a lock, checks the result, and stamps it. Before writing, count: each role is 70 characters or fewer and each arrow label 24 or fewer, with no file names in roles; `merge` refuses anything longer. Edit a fragment with the file-edit tool, not shell text substitution, which breaks on JSON. On first write, create `.map/.gitignore` containing `*` so the folder stays out of git without touching the repo's own ignore file. Write nothing outside `.map/`.
 
 1. Run `map_file.py check <repo-root> .map/map.json`, or `merge` for a fragment, and fix every problem. A restated finding is dropped or folded into the one it repeats, never reworded to pass.
 2. Spawn one read-only subagent on a mid-tier model with the prompt in `references/verifier-prompt.md` and only the new entries. For each entry it flags, correct it from the code, mark the edge inferred, move it to unknowns, move a misfiled unknown to findings, or drop a restated note.

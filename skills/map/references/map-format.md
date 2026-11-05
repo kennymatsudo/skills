@@ -4,18 +4,18 @@
 
 ## Fields
 
-- **`repo`:** the repo's name.
+- **`repo`:** the repo's name, or for one feature across several repos, the feature's name.
 - **`summary`:** two sentences on what the system does and its main request path, shown when the map opens.
-- **`built_at_commit`, `files`:** written by `map_file.py stamp`. Never edit them by hand.
+- **`root`, `built_at_commit`, `files`:** written by `map_file.py stamp`. Never edit them by hand. `root` is the folder citations start from, relative to the folder holding `.map/`; `built_at_commit` is one commit, or one per repo when the root holds several.
 - **`nodes`:** one per box.
   - `id`: short, stable, kebab-case, unique across the file.
   - `name`: what the box says.
   - `kind`: `service`, `datastore`, `queue`, `external`, `group`, or `component`.
   - `level`: 1 for services and their peers, 2 for components inside one service.
   - `parent`: `null` at level 1, else the id of the service or group it sits inside.
-  - `summary`: its role in 70 characters or fewer, in plain words, such as "Rails API for carts and orders". Say what it is for, not how it works, and don't repeat its name or its parent's.
+  - `summary`: its role in 70 characters or fewer, in plain words, such as "Rails API for carts and orders". Say what it is for, not how it works, and don't repeat its name or its parent's. No file names; the citation says where it is.
   - `tech`: optional, the framework or product, such as `Rails 8` or `Postgres 16`. Leave it out when it only repeats the parent's, such as `Rails controller` inside a Rails service.
-  - `cites`: `path:LINE` or `path:START-END` from the repo root, for where it is defined or deployed. An `external` node may have none.
+  - `cites`: `path:LINE` or `path:START-END` from the root, for where it is defined or deployed. An `external` node may have none.
   - `loaded`: `true` once its children have been mapped.
   - `verified`: `false` while a background build's node waits for the verifier; absent or `true` once checked.
 - **`edges`:** one per arrow, between nodes at the same level.
@@ -24,7 +24,7 @@
   - `evidence`: how the connection was confirmed: `config`, `client-call`, `route`, `topic`, or `inferred`.
   - `cites`: the wiring that proves it. `inferred` edges may have none.
 - **`findings`:** `{ node, severity, text, cites }`, defects a reader would act on. Each is stated once in the whole map, on the box whose code shows it; a box above it counts it without repeating it. `check` rejects a finding that restates one on the same box or a box above or below it.
-  - `severity`: `bug` (wrong today), `risk` (breaks under failure, retries, or concurrency), or `gap` (a piece the design needs is missing).
+  - `severity`: `bug` (wrong today, including handling for an expected failure that does the wrong thing, such as an error branch that can never run or a check that fails open), `risk` (correct until a failure, retry, or race the code does not handle), or `gap` (a piece the design needs is missing).
   - A description of how the code works today is not a finding, however unusual.
 - **`unknowns`:** `{ node, text }`, a question the repo cannot answer, such as a host set by an env var nothing in the repo sets, and the file where tracing stopped. Code nobody read yet is not an unknown: read it. A problem the code shows is a finding. A gap that holds for the whole repo, such as no production deploy config, is one unknown with `node: null`, not one per box.
 - **`paths`:** level 3 call chains, `{ node, title, steps: [{ call, cites }] }`, where `node` is the component the path starts in.
@@ -33,7 +33,7 @@
 
 - **Service:** something deployed or run on its own: its own container, process type, function, or app. A folder is not a service until a deploy file, Procfile entry, or build target says so.
 - **Group:** a box standing in for related services when a level would pass 20 boxes. Its members are its children.
-- **Component:** a module or class inside one service with behavior others depend on, such as a controller, a service object, or a client. Not every file: fold plain data models into one `Models` box, and helpers into the component that uses them.
+- **Component:** a module or class inside one service with behavior others depend on, such as a controller, a service object, or a client. Not every file: a service has at most 12, so group files that do one job together into one box citing all of them. Fold plain data models into one `Models` box, or leave them to the datastore's tables, and helpers into the component that uses them. Code nothing calls is not a box; record it as one finding if a reader should act on it.
 - **External:** a system the repo calls but does not deploy, such as a payment provider or an email API. It calls nothing on the map. A stub or client for it in the repo is a component of the service that holds the code.
 - **One box per piece of code.** A worker that runs another service's code maps only what is its own, such as its entrypoint and job list; the shared code stays under the service whose folder holds it. `check` rejects the same code under two services.
 
