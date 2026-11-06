@@ -31,6 +31,7 @@ Done when the kind is chosen and every box has a type and every arrow a directio
 
 Whimsical lays out each diagram itself, so the shape of what you hand it decides how clean it looks. For a box-and-arrow diagram (architecture, deployment, process), plan on paper first. For the other kinds, follow their section in `references/diagram-types.md` instead.
 
+- **Shared boxes.** When the same box would appear in several lanes, such as one datastore every path writes to or one job every path branches from, hand-place the board instead, following `references/freeform.md`, so it appears once. Steps 3 to 7 still apply. Skip flowchart lanes and `arrange`.
 - **Lanes.** Split the picture into lanes: one for the shared start, then one per branch (such as one per payment method), each its own flowchart. Each lane holds at most 6 boxes and 7 arrows. A lane that needs more splits again, and a board that needs more than 6 lanes is answering more than one question: split it into two boards.
 - **Continuity.** Start each branch lane with the box the shared lane ends on, so the reader sees where it picks up.
 - **Order.** List each lane's boxes in the order a reader meets them, and pass them to Whimsical in that order. Each box appears once per lane.
