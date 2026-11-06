@@ -68,7 +68,11 @@ header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; pad
 @media (max-width: 860px) { #legend { margin-left: 0; flex-basis: 100%; } }
 
 main { display: grid; grid-template-columns: minmax(0, 1fr) 380px; min-height: 0; }
-@media (max-width: 860px) { main { grid-template-columns: 1fr; grid-template-rows: 62vh auto; } }
+/* Stacked, the page scrolls as a whole so the panel gets its full height under the diagram. */
+@media (max-width: 860px) {
+  html, body { height: auto; } body { display: block; }
+  main { grid-template-columns: 1fr; grid-template-rows: 62vh auto; }
+}
 
 #stage { position: relative; overflow: hidden; min-height: 0; cursor: grab; touch-action: none; outline: none; }
 #stage.dragging { cursor: grabbing; }
@@ -110,7 +114,7 @@ main { display: grid; grid-template-columns: minmax(0, 1fr) 380px; min-height: 0
 
 /* Panel */
 aside { background: var(--panel); border-left: 1px solid var(--rule); overflow: auto; padding: 22px 22px 48px; }
-@media (max-width: 860px) { aside { border-left: 0; border-top: 1px solid var(--rule); } }
+@media (max-width: 860px) { aside { border-left: 0; border-top: 1px solid var(--rule); overflow: visible; } }
 aside h2 { font-size: 20px; line-height: 1.2; margin: 0; letter-spacing: -.01em; }
 aside h3 { font-size: 14px; color: var(--ink); margin: 26px 0 8px; font-weight: 600;
   padding-bottom: 6px; border-bottom: 1px solid var(--rule); }
@@ -189,6 +193,7 @@ const byId = new Map(nodes.map(n => [n.id, n]));
 const KIND = { service: 'service', datastore: 'datastore', queue: 'queue', external: 'outside system',
   group: 'group', component: 'component' };
 const SEVERITY = ['bug', 'risk', 'gap'];
+const STACKED = matchMedia('(max-width: 860px)');
 const SEV_LABEL = { bug: 'Bug', risk: 'Risk', gap: 'Gap' };
 
 let trail = [], selected = null, view = { x: 0, y: 0, k: 1 }, graph = null;
@@ -272,6 +277,8 @@ function render() {
   const stage = document.getElementById('stage');
   const boxes = childrenOf(here ? here.id : null);
   graph = null;
+  // Pan and zoom belong to a drawn level; left on, they swallow the wheel on a call path list.
+  stage.onwheel = stage.onpointerdown = stage.onpointermove = stage.onpointerup = stage.onpointerleave = null;
   legend(!boxes.length && here && pathsOf(here.id).length > 0);
   if (!boxes.length && here && pathsOf(here.id).length) {
     stage.innerHTML = '<div id="paths">' + pathsOf(here.id).map(p =>
@@ -437,6 +444,8 @@ function interact(stage, svg) {
     zoomAt(z.dataset.z === '1' ? 1.2 : 1 / 1.2, r.width / 2, r.height / 2);
   }));
   stage.onwheel = ev => {
+    // When the panel sits below the diagram, a plain scroll moves the page; drag still pans.
+    if (STACKED.matches && !ev.ctrlKey && !ev.metaKey) return;
     ev.preventDefault();
     const r = stage.getBoundingClientRect();
     if (ev.ctrlKey || ev.metaKey) zoomAt(Math.exp(-ev.deltaY * 0.01), ev.clientX - r.left, ev.clientY - r.top);
