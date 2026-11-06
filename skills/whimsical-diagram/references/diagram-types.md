@@ -20,7 +20,11 @@ Pick by the question the reader is asking. A request with two questions gets two
 - Keep that order in every diagram on the board; a participant that appears in two parts sits in the same relative place in both.
 - Before adding, check every message: none may pass over another participant's lifeline. Reorder to fix it. When no order works, as with two paths that both touch the same vendor and datastore (a webhook and a poller), split the scenario into one diagram per path.
 - `->>` for a call, `-->>` for a reply or an asynchronous callback. Draw the reply to every call whose answer decides the next step. Message labels are 6 words or fewer.
-- Show a timed gap ("30s later") as a self-message on the participant that waits.
+- Show a timed gap ("30s later") as a self-message on the participant that waits. A self-message is for work a participant does. A note like "auth service not called" goes in a text item beside the diagram.
+- Every scenario ends with the reply that reaches its initiator, including failure scenarios ("401, account locked"), so the reader sees each outcome.
+- Give every diagram on the board a numbered title naming its scenario, in the order a reader should take them ("1 Login succeeds", "2 Later requests", "3 Fifth failed login"). Space the diagrams evenly with the `arrange` template in SKILL.md.
+- Give each datastore its own color, even when two share the `database` type: violet `#5B4B8A` for the first and teal `#3F6E78` for the second. The legend names each one's role ("Postgres: accounts", "Redis: sessions and failure counts").
+- State each piece of data's home once, in the legend or the subtitle, and keep every panel consistent with it. Don't let a lock that lives in Postgres sit beside a counter that lives in Redis without saying so.
 
 ## State
 

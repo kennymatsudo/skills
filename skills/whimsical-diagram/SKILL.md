@@ -31,7 +31,8 @@ Done when the kind is chosen and every box has a type and every arrow a directio
 
 Whimsical lays out each diagram itself, so the shape of what you hand it decides how clean it looks. For a box-and-arrow diagram (architecture, deployment, process), plan on paper first. For the other kinds, follow their section in `references/diagram-types.md` instead.
 
-- **Shared boxes.** When the same box would appear in several lanes, such as one datastore every path writes to or one job every path branches from, hand-place the board instead, following `references/freeform.md`, so it appears once. Steps 3 to 7 still apply. Skip flowchart lanes and `arrange`.
+- **Branch board.** When a request comes in, one component branches it by type into parallel paths, and the paths write to one shared store, follow `references/branch-board.md` and draw it with its script. That layout scored highest of any tried. Skip steps 3 to 6 and resume at step 7.
+- **Shared boxes.** When the same box would appear in several lanes in any other shape, hand-place the board instead, following `references/freeform.md`, so it appears once. Steps 3 to 7 still apply. Skip flowchart lanes and `arrange`.
 - **Lanes.** Split the picture into lanes: one for the shared start, then one per branch (such as one per payment method), each its own flowchart. Each lane holds at most 6 boxes and 7 arrows. A lane that needs more splits again, and a board that needs more than 6 lanes is answering more than one question: split it into two boards.
 - **Continuity.** Start each branch lane with the box the shared lane ends on, so the reader sees where it picks up.
 - **Order.** List each lane's boxes in the order a reader meets them, and pass them to Whimsical in that order. Each box appears once per lane.
@@ -40,6 +41,15 @@ Whimsical lays out each diagram itself, so the shape of what you hand it decides
 - **Fan-in.** At most 2 arrows end at any box. Draw a shared datastore once per lane, as that lane's last box, and fold extra writes into one arrow.
 - **Own trigger, own lane.** A path that starts on its own, such as a poller, a cron job, or an incoming webhook, gets its own lane with the trigger as the first box: "Poller → Venmo API → Payouts DB". Never splice it into the middle of another lane.
 - **Side paths.** Alerts and retries go last in the lane's order so they sit off the main line.
+- **Say what a reviewer would ask.**
+  - Number the steps whenever position alone doesn't give their order, such as two arrows leaving one box.
+  - Label each branch arrow with its condition ("type = card").
+  - Use one verb for one kind of action across all paths ("update", not "record", "save" and "update").
+  - Title each record box with the state it leaves the row in, so several boxes read as one row moving through states.
+  - Finish every story. Each request ends at a visible reply or end state, and every call that can fail shows its failed state on the board. A subtitle line like "failures not shown" doesn't count unless it names where they are shown. Each state that isn't final shows what moves it on (a callback, a reader, a job), or the subtitle says where that's shown. Reviewers mark a diagram down first for a path that just stops.
+- **Behavior is a second line.** Retries and alerts go on the box's second line, not in boxes of their own. Sibling boxes get parallel second lines ("retries 3, then alerts", "retries with same key", "no external call").
+- **One risk callout.** Put the design's known gap in one red outlined box right next to the arrow or box it's about, and add a Risk row to the legend. Red means nothing else on the board.
+- **Subtitle.** Under the title, one `l0` line giving scope, status, and where anything left out is shown ("Proposed design, draft for review. Retries and refunds are in the error-handling doc."). If nothing in scope is left out, say so ("Shows every path in scope."). Saying something is "not drawn" without saying where it is fails review.
 - **Short text.** Box labels are 3 words or fewer. Arrow labels are a verb and what it carries, 5 words or fewer ("submit payout, idempotency key"). Detail that doesn't fit goes in your reply, not on the board.
 
 Done when you have listed every lane with its boxes in order and its arrows, and checked each lane against each rule above: no backward arrow, no box with more than 2 incoming, no label over its limit.
@@ -119,8 +129,10 @@ Done when every item passes on the latest snapshot, or two rounds are spent and 
 
 ## 8. Review with fresh eyes
 
-Every board gets this step, whatever its kind. Spawn the two reviewers in `references/review.md` in parallel, one for clarity and one for accuracy. List every finding and decide each: **fix** it when you can confirm it in the snapshot or the source, by going back to step 2 for that lane and rerunning steps 6 and 7; **skip** it only when it is wrong, and write down why. "It would need a backward arrow" is never a reason to skip; it means the path needs its own lane. After the fixes, rerun step 7 on a fresh snapshot. If you rebuilt any lane, also rerun the clarity reviewer on that snapshot; text-only edits need only step 7. Stop after two review rounds.
+Every board gets this step, whatever its kind. In parallel, spawn the clarity and accuracy reviewers in `references/review.md` and the checklist checker in `references/checklist.md`. List every finding and decide each: **fix** it when you can confirm it in the snapshot or the source, by going back to step 2 for that lane and rerunning steps 6 and 7; **skip** it only when it is wrong, and write down why. "It would need a backward arrow" is never a reason to skip; it means the path needs its own lane. For a branch board, fix the spec and redraw it on a new board, then trash the old board with the `delete` tool. After the fixes, rerun step 7 on a fresh snapshot, then rerun the checklist checker as a new subagent every round, because its count is the bar for this step. If you rebuilt any lane, also rerun the clarity reviewer.
 
-Done when every finding is marked fixed or skipped with its reason, and step 7 passed on a snapshot taken after your last change.
+Wait for every reviewer's report before acting on any of them or replying. A reply sent while reviewers are still running ends the session with the loop unfinished. This loop applies to every kind of diagram. After each round, write a line such as "Round 2: checklist 10/12, failed 7 and 8, fixed both". A round below 11/12 is followed by another, up to round 3. Fix the failed checks first; act on other reviewer findings only when they don't undo a passing check.
 
-**Reply:** the board link, one line on what the diagram answers, any detail you left off the board to keep it clear, and each reviewer finding with fixed or skipped and the reason.
+Done when the latest checklist count is 11/12 or better, every finding is marked fixed or skipped with its reason, and step 7 passed on a snapshot taken after your last change. Below 11 after three rounds, hand back with the count and the failed checks.
+
+**Reply:** the board link, one line on what the diagram answers, any detail you left off the board to keep it clear, each reviewer finding with fixed or skipped and the reason, and every round line in order.

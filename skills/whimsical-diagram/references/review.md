@@ -26,6 +26,12 @@ Fill in the bracketed parts:
 >
 > Report in under 250 words. Cite the source for every claim.
 
+## Holistic critics
+
+The bar is the checklist in `checklist.md`, not a score out of 10. In testing, holistic critics settled at 7 to 8 however good the board was, and found a new issue every round.
+
+Critics disagree with each other and drift: one may call an arrow backward and the next call the fix backward. Keep a fix only when it follows a rule in SKILL.md or the reviewer names a concrete misreading. To compare two versions, give each to two critics in opposite orders, and trust a preference only if it holds both ways. Critics tend to prefer whichever version they see second.
+
 ## Using the reports
 
 Judge each finding yourself and act only on what you can confirm in the snapshot or the source. A reviewer's misreading of a correct diagram counts as a clarity defect when the reader would make the same mistake.
