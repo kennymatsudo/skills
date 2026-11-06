@@ -6,7 +6,7 @@ Twelve pass/fail checks. The score is the number that pass, and the bar is 11. E
 2. **Right kind, one level.** The diagram kind fits the question (see `diagram-types.md`), and every box sits at the same zoom level.
 3. **Legend matches.** Every color, shape, fill and line style on the board has a legend entry, and every legend entry is used.
 4. **No collisions.** No arrow crosses a box, a label or another arrow, and no two arrows overlap.
-5. **One reading direction.** The main path runs left to right or top to bottom, and no arrow points back against it. Shared or merged lines don't count as backward.
+5. **One reading direction.** The main path runs left to right or top to bottom, and no arrow points back against it. Shared or merged lines don't count as backward. On a parts board, the lower track's answers run right to left by design; judge only the upper track.
 6. **Labeled arrows.** Every arrow that carries something has a label of 5 words or fewer, with a verb. A branch arrow may carry its condition instead ("method = UPS"). The trunk and bar of a branch tree carry nothing, so they need no label. Arrows doing the same kind of action use the same verb.
 7. **Unambiguous order.** Wherever position alone doesn't show which step comes first, numbers or titles do. Each one reads in a consistent sequence, and parallel lanes count their own steps with a letter (4a, 5a and 4b), so a shorter lane simply ends sooner.
 8. **Every story ends.** Each request reaches a visible reply or end state, failures included. Each state that isn't final shows what moves it on, or the subtitle says where that's shown.

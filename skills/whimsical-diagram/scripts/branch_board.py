@@ -4,13 +4,22 @@
 Reads a JSON spec (see references/branch-board.md) and prints JSON with two
 operation lists for the Whimsical MCP `edit` tool:
 
-  step1: every shape, text, connector and the legend table, at fixed positions
-  step2: legend fixes that need the table's id (replace <TABLE_ID> after a fetch)
+  step1: every shape, text and connector, at fixed positions
+
+Run it again with --palette once step1 is on the board, to get the legend:
+
+  step2: the legend table, its key cells in the board's own color keys
+  step3: legend fixes that need the table's id (replace <TABLE_ID> after a fetch)
 
 Usage: python3 branch_board.py spec.json > ops.json
+       python3 branch_board.py spec.json --palette palette.txt > legend.json
 """
 import json
+import os
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from legend import legend_ops  # noqa: E402
 
 PALETTE = {
     "person": "#374151",
@@ -269,18 +278,7 @@ def build(spec):
     if risky:
         keys.append({"text": "Risk", "color": PALETTE["risk"], "deco": "outline", "bold": True})
         meanings.append("Red: known gap to discuss in review")
-    n = len(keys)
-    ops.append({"op": "add", "type": "table", "x": 0, "y": legend_y, "head_style": "hide",
-                "columns": [{"header": "-", "width": 200} for _ in range(n)],
-                "rows": [keys, meanings]})
-    widths = [int(content_right // n)] * n
-    widths[-1] += int(content_right) - sum(widths)
-    step2 = [
-        {"op": "update", "id": "<TABLE_ID>", "type": "table", "widths": widths},
-        {"op": "update", "id": "<TABLE_ID>", "x": 0, "y": legend_y},
-        {"op": "remove_rows", "id": "<TABLE_ID>", "indices": [0]},
-    ]
-    return {"step1": ops, "step2": step2}
+    return ops, {"keys": keys, "meanings": meanings, "y": legend_y, "width": content_right}
 
 
 def main():
@@ -306,7 +304,12 @@ def main():
         problems += [f"readers[{k}] needs '{f}'" for f in ("branch", "label", "edge") if f not in rd]
     if problems:
         sys.exit("spec problems (see references/branch-board.md):\n  " + "\n  ".join(problems))
-    json.dump(build(spec), sys.stdout, indent=1)
+    ops, legend = build(spec)
+    if "--palette" in sys.argv:
+        with open(sys.argv[sys.argv.index("--palette") + 1]) as f:
+            json.dump(legend_ops(legend, f.read()), sys.stdout, indent=1)
+    else:
+        json.dump({"step1": ops}, sys.stdout, indent=1)
 
 
 if __name__ == "__main__":

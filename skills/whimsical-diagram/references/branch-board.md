@@ -57,7 +57,9 @@ Save it to a scratch file. Every label follows SKILL.md's rules: boxes 3 words o
 
 1. Run `python3 <skill dir>/scripts/branch_board.py spec.json > ops.json`.
 2. Create the board with `create_file`, then send `step1` as one `edit` call's `operations`.
-3. Fetch the board with `select_kinds: ["table"]` for the legend's id. Replace `<TABLE_ID>` in `step2` and send it as a second `edit` call. Whimsical ignores a new table's position and its hidden header, and this step fixes both.
-4. Go on to SKILL.md step 7.
+3. Fetch the board with `detail: "detailed"` and `limit: 1`, and save the line that starts `Palette:` to a scratch file. Table cells refuse hex colors and take these `custom-` keys instead.
+4. Run the script again with `--palette <that file>`. Send `step2` as one `edit` call.
+5. Fetch the board with `select_kinds: ["table"]` for the legend's id. Replace `<TABLE_ID>` in `step3` and send it as a third `edit` call. Whimsical ignores a new table's position and its hidden header, and this step fixes both.
+6. Go on to SKILL.md step 7.
 
 To change the board, edit the spec and redraw it on a fresh board. Never edit `ops.json` or the drawn labels afterward, not even when a reviewer misreads something. Step numbers like 4a, 4b and 4c mark parallel branches, and stripping them is what made earlier test boards read as unfinished. When a reviewer misreads the board, fix it through the spec's wording. Connectors don't follow shapes that move, so nudging pieces by hand undoes the layout.

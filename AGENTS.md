@@ -19,4 +19,4 @@ Follow this repo's `skills/create-skill/SKILL.md`, not an installed create-skill
 - **Commit.** Follow this repo's `skills/commit/SKILL.md`, not an installed commit skill of the same name. Separate commits per concern, for example repo setup apart from a new skill.
 - **README.** Add or update the skill's row in the README's skills index.
 
-To improve the map skill against a real repo, run the loop in `docs/map-tuning.md`.
+To improve the map skill against a real repo, run the loop in `docs/map-tuning.md`. To improve the whimsical-diagram skill against a real design doc, run the loop in `docs/whimsical-tuning.md`.
