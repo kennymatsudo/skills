@@ -13,6 +13,7 @@ My personal agent skills for the recurring work of a coding session: committing,
 | [map](skills/map/SKILL.md) | Maps a codebase's services and how they connect, then zooms into one service or path on request, with every box and arrow cited, each level saved locally, and a clickable diagram page to browse it. |
 | [polish](skills/polish/SKILL.md) | Polishes a finished branch in one run: applies strong design-review refactors, then reviews tests, renames, cuts code slop, cleans comments, and tidies docs, leaving it uncommitted. |
 | [pr-description](skills/pr-description/SKILL.md) | Drafts a PR title and a short body (why, then a few high-level bullets) in the repo's template, and offers checkable notes for review bots. |
+| [refactor-agent-instructions](skills/refactor-agent-instructions/SKILL.md) | Refactors an AGENTS.md or CLAUDE.md to the best practices it looks up on the web for today's date and newest models, keeping every project fact, and edits only after you approve the plan. |
 | [rename-variables](skills/rename-variables/SKILL.md) | Renames identifiers your branch adds, or under a given path, so each is honest and in the repo's vocabulary, updating every reference. |
 | [restate](skills/restate/SKILL.md) | Restates your request in its own words, with the established name for the pattern, and waits for a yes. |
 | [review-design](skills/review-design/SKILL.md) | Reviews a branch or codebase against design principles, domain boundaries, and service layering, and returns a ranked, code-cited report. |
